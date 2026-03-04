@@ -25,7 +25,7 @@ source-files: [credit-card-analysis/nodeData/]
 - Always say numbers digit by digit for order/reference numbers: "Order 1-2-3-4-5-6."
 - Always say dollar amounts naturally: "twelve dollars and ninety-nine cents."
 - Always say phone numbers in groups: "area code 8-4-8, 4-6-6, 8-8-2-5."
-- Always include a #VOICE & PRONUNCIATION section in instructions.
+- Always include company-specific pronunciation guidance in instructions (company name, product names, etc.).
 - Always use `silenceOverlayAction: true` with a subtle keyboard/typing sound URL to fill processing gaps.
 
 ## SetSessionConfig Reference (68 keys in production)
@@ -44,19 +44,15 @@ Silence:     silenceOverlayAction=true, silenceOverlayDelay=2
              silenceOverlayURL="https://eyal-aws-bucket.s3.amazonaws.com/public/computer_keyboard_pr.mp3"
 ```
 
-## Pronunciation Rules Template
+## Pronunciation Rules
 
-Include this in every voice demo's `context.instructions`:
+The standard ALWAYS rules in `instruction-patterns` already cover general pronunciation (dates, dollars, addresses, emails, times, special characters). Use the `#[COMPANY] SPECIFIC RULES` section for company-specific pronunciation only:
 
 ```
-#VOICE & PRONUNCIATION
-- Say "[CompanyName]" clearly.
-- Spell out order numbers digit by digit: "Order number 1-2-3-4-5-6-7-8-9."
-- Say dollar amounts naturally: "twelve dollars and ninety-nine cents."
-- Say phone numbers in groups: "area code 8-4-8, 4-6-6, 8-8-2-5."
-- Say store addresses clearly with pauses between parts.
+#[COMPANY] SPECIFIC RULES
+- Say "[CompanyName]" as "[phonetic pronunciation]".
+- [Product name] is pronounced "[phonetic]".
 - Use a [warm/professional/calm] tone.
-- Do not use em dashes, colons, or semicolons in your responses.
 ```
 
 ## AI Agent Streaming Config (in aiAgentJob node)
@@ -76,7 +72,7 @@ This makes voice responses feel natural — the agent starts speaking as soon as
 After importing a package, the user needs to:
 1. **Set TTS voice** — the `ttsVoice` ID in setSessionConfig (ElevenLabs voice ID)
 2. **Set LLM provider** — the `llmProviderReferenceId` in the AI Agent Job config
-3. **Rename AI Agent** — from "Jane" to the demo persona name
+3. **Verify AI Agent name** — should already be "Jane" (standard for all demos)
 
 ## What Breaks in Voice Demos
 

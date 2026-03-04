@@ -35,7 +35,7 @@ cloneAndModify("./credit-card-analysis", {
   description: "AI-powered IVR replacement",
 
   // Sets context.instructions in OnFirstExecution chain
-  instructionsCode: 'context.instructions = `\n#INTRO\nYou are Olivia...\n#RULES\n...\n`;',
+  instructionsCode: 'context.instructions = `\n#INTRO\nYou are Jane...\n#RULES\n...\n`;',
 
   // Sets context.knowledge in OnFirstExecution chain
   knowledgeCode: 'context.knowledge = `\n## Print Services\n...\n`;',

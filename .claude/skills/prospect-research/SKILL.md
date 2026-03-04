@@ -79,7 +79,7 @@ After research, you should be able to fill in:
 ```
 Company:       [Name]
 Industry:      [Vertical]
-Agent Persona: [Name + personality]
+Agent Persona: Jane — [personality traits]
 Tone:          [formal/balanced/casual]
 Channel:       [voice/chat/both]
 Demo scenario: [1-2 sentence description]
@@ -93,7 +93,7 @@ Escalation:    [what triggers human handoff]
 ```
 Company:       Office Depot (includes OfficeMax brand)
 Industry:      Retail / Office Supplies
-Agent Persona: Olivia — warm, upbeat, knowledgeable
+Agent Persona: Jane — warm, upbeat, knowledgeable
 Tone:          Balanced — friendly but efficient
 Channel:       Voice (IVR replacement)
 Demo scenario: Customer calls about order status, rewards, returns, store info

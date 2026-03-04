@@ -56,13 +56,37 @@ For each tool that returned data:
 
 ### 5. Voice Readiness (would this sound good spoken?)
 
-- No markdown, bullets, numbered lists, or special characters in responses
-- Numbers spelled appropriately: "5-6-4-3-5-6-3" not "5643563", "$47.82" not "$47.82000"
-- Phone numbers in groups: "8-4-8, 4-6-6, 8-8-2-5"
-- Addresses read clearly with natural pauses
-- No URLs spoken aloud (offer to text/email instead)
-- Responses use conversational fillers: "sure thing", "absolutely", "let me check"
+**Formatting (no visual artifacts)**:
+- No markdown, bullets, numbered lists, symbols, asterisks, or em dashes in responses
+- No URLs spoken aloud (agent should say "I can send you a text with that link")
+
+**Natural pronunciation**:
+- Dates spoken naturally: "April eighteenth, twenty twenty-five" not "04/18/2025"
+- Dollar amounts spoken naturally: "Two hundred thirty-six dollars and thirteen cents" not "$236.13"
+- Phone numbers in groups: "eight-four-eight, four-six-six, eight-eight-two-five"
+- Addresses spoken fully: "One-Two-Three Main Street" not "123 Main St"
+- Emails spoken naturally: "john dot smith at gmail dot com" not "john.smith@gmail.com"
+- Times spoken naturally: "Nine in the morning" not "9:00 AM"
+- Special characters named: "apostrophe" not "'"
+
+**Conversational tone**:
+- Responses use natural fillers: "um", "uh", "well", "let's see", "alright", "okay"
+- ElevenLabs-optimized emotion responses: "Oh no!", "haha", etc.
+- Commas used instead of periods for natural TTS pacing
+- Rapport-building phrases and empathy acknowledgments present
 - No robotic phrasing like "I have retrieved the following information"
+- Contractions and friendly phrases: "Alright", "You're doing great", "Let's keep going"
+
+**Conversation flow**:
+- One question per turn (never multiple questions in a single response)
+- Agent waits for confirmation before moving to next step (never previews next step)
+- Agent uses "sound" or "hear" language, never "looks" (voice channel)
+- Follow-up questions keep the conversation going
+
+**Confirmation spelling** (check when agent reads back user-provided details):
+- Names spelled letter-by-letter: "I heard first name as f-r-e-d-y-s..."
+- Phone numbers digit-by-digit: "I heard one-two-three, four-five-six..."
+- Emails spoken with "at" and "dot": "I heard john dot smith at gmail dot com..."
 
 ### 6. Edge Cases & Guardrails
 

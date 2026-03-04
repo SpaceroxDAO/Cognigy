@@ -114,6 +114,14 @@ context.rewardsResult = result;
 
 ## Answer Patterns
 
+### Voice-Friendly Answer Text
+Tool answers are what the agent reads aloud. When flattening data in code nodes, use TTS-friendly formatting:
+- Spell out dates: `"April eighteenth, twenty twenty-five"` not `"04/18/2025"`
+- Spell out dollars: `"Two hundred thirty-six dollars and thirteen cents"` not `"$236.13"`
+- Spell out addresses: `"One-Two-Three Main Street"` not `"123 Main St"`
+- Use commas for natural pacing: `"Order confirmed, your reference number is..."` not periods
+- Or use the instructional pattern and let the LLM format it naturally (preferred for complex data)
+
 ### PROVEN PATTERN: Flat context reference (ALWAYS use this)
 ```
 "{{context.xxxResult}}"

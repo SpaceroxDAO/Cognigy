@@ -60,7 +60,7 @@ spec.sms = { from: "+12243487563", to: "+18484668825" };  // spec-level, shared 
 
 ## Instruction Prompt Structure
 
-Use `context.instructions` with sections: `#INTRO`, `#RULES` (ALWAYS/NEVER), `#TOOL ORDER`, `#VOICE & PRONUNCIATION`. See `/demo-builder` skill for templates.
+Use `context.instructions` with sections: `#INTRO`, `#RULES` (ALWAYS/NEVER/Confirmation), `#TOOL ORDER`, then domain-specific rules. The standard voice rules (mandatory for every demo) are in the `instruction-patterns` skill. Agent name is always "Jane".
 
 ## Key Conventions
 
@@ -114,7 +114,7 @@ Before modifying any source file, read the relevant skill first.
 - **`demo-builder`** — End-to-end process: research, spec, build, validate, deliver. The orchestrator skill.
 - **`package-builder`** — clone-and-modify usage, working examples, failure modes, ZIP validation.
 - **`tool-design`** — Tool schemas, mock data patterns, answer patterns, common mistakes.
-- **`instruction-patterns`** — Prompt structure, ALWAYS/NEVER rules, three code node chain.
+- **`instruction-patterns`** — Standard voice rules (MANDATORY for every demo), prompt structure, three code node chain.
 - **`voice-config`** — TTS/STT settings, pronunciation rules, what breaks in voice demos.
 - **`prospect-research`** — How to research a prospect and extract demo-relevant context.
 - **`cognigy-package-format`** — ZIP structure, file schemas, cross-references. Debug reference.

@@ -21,9 +21,9 @@ source-files: [build-office-depot.js]
 - Always research the prospect's real products, terminology, and customer workflows.
 - Always have `authenticate` as tool #1 and `agent_handover` as the last tool.
 - Always use "Adam Boyle" as the demo persona (the user's testing identity).
-- Always include a #VOICE & PRONUNCIATION section in instructions for voice demos.
+- Always include the standard ALWAYS/NEVER/Confirmation voice rules from the `instruction-patterns` skill in every demo's #RULES section.
 - Always use the clone-and-modify approach with `credit-card-analysis/` as source.
-- Always make the greeting specific: "Thank you for calling [Company]! This is [Name]..."
+- Always make the greeting specific: "Thank you for calling [Company]! This is Jane..."
 - Always include a FAQ/knowledge code node — agents with knowledge give dramatically better demos.
 
 ## Process
@@ -56,12 +56,12 @@ Create a build script following `build-office-depot.js` as the reference. The sp
 
 **instructionsCode** (the main prompt):
 ```
-#INTRO        — Who you are, exact greeting script
-#RULES        — ALWAYS/NEVER lists (conversation behavior)
+#INTRO        — Who you are (Jane), exact greeting script
+#RULES        — Standard ALWAYS/NEVER/Confirmation rules (from instruction-patterns skill) + demo-specific rules
 #TOOL ORDER   — Numbered tool list with when to use each
 #DOMAIN RULES — Industry-specific constraints
-#VOICE        — Pronunciation guidance
 ```
+**CRITICAL**: Load the `instruction-patterns` skill and copy the standard voice rules verbatim into #RULES. These are mandatory for every demo.
 
 **knowledgeCode** (FAQ content):
 - 3-5 topic sections as Q&A or reference material
@@ -89,46 +89,36 @@ unzip -l ./Output.zip | grep "^        0"
 Tell the user:
 - Package file location
 - Flow name and tool count
-- Post-import steps: rename AI Agent, set LLM provider, set TTS voice
+- Post-import steps: set LLM provider, set TTS voice (agent name is already Jane)
 - Import path: Cognigy.AI → Build → Packages → Import
 
 ## Proven Patterns from Past Demos
 
-### Instructions structure that works (Office Depot)
+### Instructions structure that works
 ```
 context.instructions = `
 #INTRO
-You are Olivia, the friendly AI assistant for Office Depot.
-When the conversation starts, greet the caller warmly: "Thank you for calling Office Depot!..."
+You are Jane, the friendly AI assistant for [Company].
+When the conversation starts, greet the caller warmly: "Thank you for calling [Company]!..."
 
 #RULES
-**ALWAYS**
-- Ask no more than one question per turn.
-- Keep responses to 1-2 short sentences.
-- Use natural, conversational language.
-- Confirm important details by reading them back.
+## Conversation & Tool Guidelines
 
-**NEVER**
-- Never disclose that you are an AI.
-- Never use markdown, bullet points, or special characters.
-- Never give more than 3 sentences in a single response.
+[PASTE STANDARD ALWAYS/NEVER/CONFIRMATION RULES FROM instruction-patterns SKILL HERE]
+
+[Then add demo-specific rules below:]
 
 #TOOL ORDER
 1. authenticate -- Always verify first
-2. order_status -- Check tracking info
+2. [tool_id] -- [When to use]
 ...
-7. agent_handover -- Transfer when needed
+N. agent_handover -- Transfer when needed
 
-#OFFICE DEPOT SPECIFIC RULES
-- Office Depot and OfficeMax are the same company.
-- The rewards program is called "Office Depot Rewards."
-...
-
-#VOICE & PRONUNCIATION
-- Spell out order numbers digit by digit.
-- Say dollar amounts naturally.
+#[COMPANY] SPECIFIC RULES
+- [Industry/company-specific constraints]
 `;
 ```
+**NOTE**: The example above is abbreviated. The full standard ALWAYS/NEVER/Confirmation rules are in the `instruction-patterns` skill — load it and copy them verbatim into #RULES for every demo.
 
 ### agentJobConfig.instructions pattern
 ```
@@ -152,4 +142,4 @@ Then in agentJobConfig.instructions: `"Refer to {{context.script}} for example d
 - **Agent Job name**: Role title, not persona name (e.g., "Customer Support Specialist")
 - **Tool IDs**: `snake_case` (e.g., `order_status`, `store_locator`)
 - **Labels**: Title Case (e.g., "Order Status", "Store Locator")
-- **Agent persona**: Human first name (Olivia, Sophia, Allie)
+- **Agent persona**: Always "Jane" (standard name for all demos)
