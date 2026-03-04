@@ -2,6 +2,8 @@
 name: package-builder
 description: Load when calling cloneAndModify(), writing a build script, generating a ZIP package, debugging package import failures, or modifying clone-and-modify.js. Includes working examples, validation, and failure modes.
 user-invocable: false
+dependencies: [tool-design, cognigy-package-format]
+source-files: [cognigy-package-generator/clone-and-modify.js, build-office-depot.js]
 ---
 
 # Package Builder — Clone-and-Modify

@@ -2,6 +2,8 @@
 name: instruction-patterns
 description: Load when writing context.instructions, context.knowledge, authentication code, ALWAYS/NEVER rules, intro prompts, or the three code node chain (Auth, FAQ, Instructions).
 user-invocable: false
+dependencies: [voice-config]
+source-files: [build-office-depot.js]
 ---
 
 # Instruction Patterns

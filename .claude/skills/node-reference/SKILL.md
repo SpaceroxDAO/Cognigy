@@ -2,6 +2,8 @@
 name: node-reference
 description: Load when looking up a Cognigy node type's config fields, extension name, or localizedData schema. Covers all node types used in AI Agent flows.
 user-invocable: false
+dependencies: []
+source-files: [credit-card-analysis/nodeData/]
 ---
 
 # Cognigy Node Type Reference

@@ -2,6 +2,7 @@
 name: demo-review
 description: Load when reviewing a demo transcript or session logs, QA testing a demo, analyzing agent behavior, or identifying issues to fix before delivery.
 user-invocable: false
+dependencies: [tool-design, instruction-patterns]
 ---
 
 # Demo Review — Structured QA from Transcripts & Logs

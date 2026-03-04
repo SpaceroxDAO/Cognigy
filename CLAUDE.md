@@ -98,6 +98,17 @@ Skills are loaded on-demand. CLAUDE.md is always in context and acts as the rout
 | Reviewing a demo transcript or session logs | `demo-review` |
 | QA testing a demo before delivery | `demo-review` + `tool-design` |
 
+### Source File → Skill Lookup
+
+Before modifying any source file, read the relevant skill first.
+
+| Working on... | Read first |
+|---|---|
+| `cognigy-package-generator/clone-and-modify.js` | `package-builder` + `cognigy-package-format` |
+| `build-office-depot.js` (or any build script) | `package-builder` + `tool-design` |
+| `credit-card-analysis/nodeData/*` | `node-reference` |
+| `credit-card-analysis/chart/*` | `cognigy-package-format` |
+
 ### Skill Reference
 
 - **`demo-builder`** — End-to-end process: research, spec, build, validate, deliver. The orchestrator skill.

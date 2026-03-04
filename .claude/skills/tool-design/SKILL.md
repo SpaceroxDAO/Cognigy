@@ -2,6 +2,8 @@
 name: tool-design
 description: Load when designing AI Agent tools, writing tool schemas, creating mock data for tool code nodes, writing tool answer text, or defining the tools array in a build spec.
 user-invocable: false
+dependencies: [instruction-patterns, node-reference]
+source-files: [cognigy-package-generator/clone-and-modify.js]
 ---
 
 # Tool Design Patterns

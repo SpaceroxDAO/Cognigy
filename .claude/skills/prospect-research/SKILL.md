@@ -2,6 +2,7 @@
 name: prospect-research
 description: Load when researching a prospect company, gathering demo context, identifying IVR pain points, or preparing a demo spec before building.
 user-invocable: false
+dependencies: []
 ---
 
 # Prospect Research

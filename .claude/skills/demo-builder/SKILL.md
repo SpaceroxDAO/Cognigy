@@ -2,6 +2,8 @@
 name: demo-builder
 description: Load when building a new Cognigy demo package end-to-end, creating a demo for a prospect, or running the /create-demo workflow. Covers research, spec, build, validate, deliver.
 user-invocable: false
+dependencies: [prospect-research, tool-design, instruction-patterns, voice-config, package-builder]
+source-files: [build-office-depot.js]
 ---
 
 # Demo Builder — End-to-End Process

@@ -2,6 +2,8 @@
 name: cognigy-package-format
 description: Load when debugging package import errors, inspecting ZIP contents, understanding nodeData/chart/flow JSON structure, or tracing ID cross-references between package files.
 user-invocable: false
+dependencies: [node-reference]
+source-files: [credit-card-analysis/]
 ---
 
 # Cognigy Package Format

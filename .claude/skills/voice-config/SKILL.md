@@ -2,6 +2,8 @@
 name: voice-config
 description: Load when configuring TTS, STT, voice settings, pronunciation rules, silence overlay, barge-in, DTMF, no-input timeout, or SetSessionConfig node values.
 user-invocable: false
+dependencies: [node-reference]
+source-files: [credit-card-analysis/nodeData/]
 ---
 
 # Voice Configuration
