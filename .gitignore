@@ -4,8 +4,10 @@
 # Extracted packages for analysis (not source templates)
 package-analysis/
 
-# Claude Code local config
-.claude/
+# Claude Code local config (keep skills + commands, exclude the rest)
+.claude/settings.json
+.claude/settings.local.json
+.claude/*.jsonl
 
 # macOS
 .DS_Store
