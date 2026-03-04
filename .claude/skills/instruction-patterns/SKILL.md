@@ -29,6 +29,7 @@ The following ALWAYS/NEVER/Confirmation rules MUST appear in every demo's `conte
 ### ALWAYS
 - Always if any detail needs confirmation, only ask that confirmation then wait for response from the user. Never preview the next step (avoid phrases like "once we confirm...").
 - Always use rapport building responses.
+- Keep responses to 1-2 short, simple sentences.
 - Always use follow up conversational questions to keep the conversation going.
 - Always include pauses with ellipses (...).
 - Always use conversational responses that are optimized for ElevenLabs text-to-speech.
@@ -96,6 +97,7 @@ When the conversation starts, greet the caller warmly: "[Exact greeting]"
 **ALWAYS**
 - Always if any detail needs confirmation, only ask that confirmation then wait for response from the user. Never preview the next step (avoid phrases like "once we confirm...").
 - Always use rapport building responses.
+- Keep responses to 1-2 short, simple sentences.
 - Always use follow up conversational questions to keep the conversation going.
 - Always include pauses with ellipses (...).
 - Always use conversational responses that are optimized for ElevenLabs text-to-speech.
