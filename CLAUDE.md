@@ -46,7 +46,16 @@ cloneAndModify(
 ```
 Start → Once → [OnFirstExecution: SetSessionConfig → FAQ Code → Instructions Code]
       → AI Agent Job (Default + Tool branches) → End
-Each tool branch: aiAgentJobTool → Code (mock logic) → Resolve Tool Action
+Regular tool: aiAgentJobTool → Code (mock logic) → Resolve Tool Action
+xApp tool:    aiAgentJobTool → Code → initAppSession → sendSMS → setHTMLAppState → Resolve Tool Action
+```
+
+## xApp Tools (SMS + Branded HTML)
+
+Add `tool.xApp` to make a tool send a branded web page via SMS:
+```javascript
+tool.xApp = { logoUrl: "https://...", backgroundColor: "#CC0000", html: "<!DOCTYPE html>..." };
+spec.sms = { from: "+12243487563", to: "+18484668825" };  // spec-level, shared by all xApp tools
 ```
 
 ## Instruction Prompt Structure
@@ -105,4 +114,5 @@ Skills are loaded on-demand. CLAUDE.md is always in context and acts as the rout
 
 ```bash
 node build-office-depot.js    # Build Office Depot demo (example/reference)
+# Verify: output should show "nodeData: 34" and "Tools: 7 (1 xApp)"
 ```

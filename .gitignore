@@ -4,6 +4,9 @@
 # Extracted packages for analysis (not source templates)
 package-analysis/
 
+# Claude Code local config
+.claude/
+
 # macOS
 .DS_Store
 
