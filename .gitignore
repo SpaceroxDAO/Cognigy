@@ -1,0 +1,11 @@
+# Generated ZIP packages
+*.zip
+
+# Extracted packages for analysis (not source templates)
+package-analysis/
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/

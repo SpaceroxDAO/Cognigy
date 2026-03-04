@@ -1,0 +1,102 @@
+// Default values derived from analyzing the AB Lab package
+
+const DEFAULT_COGNIGY_VERSION = "2026.4.0";
+
+const DEFAULT_FLOW_SETTINGS = {
+  continueExecutionAfterAttachedFlow: false,
+  continueExecutionAfterDefaultReply: false,
+  continueExecutionAfterNegativeConfirmation: false,
+  passDefaultRepliesIntoFlow: false,
+  flowIntentMappingOrder: "joint",
+  useAttachedFlowThresholds: true,
+  useAttachedFlowContinueAfterDefaultReply: true,
+  useAttachedFlowPassDefaultRepliesIntoFlow: true,
+  implicitSlotParsing: "disabled",
+  useAttachedFlowImplicitSlotParsing: false,
+  useIntentDefaultRepliesAsExamples: true,
+  lexiconSlotsWithSubMatches: false,
+  localeSettings: [],
+};
+
+const DEFAULT_AI_AGENT_JOB_CONFIG = {
+  llmProviderReferenceId: "default",
+  toolChoice: "auto",
+  useStrict: false,
+  memoryType: "inherit",
+  selectedProfileFields: "",
+  memoryContextInjection:
+    "[[snippet-eyJ0eXBlIjoiY29udGV4dCIsImxhYmVsIjoiU2hvcnQtVGVybSBNZW1vcnkiLCJzY3JpcHQiOiJjb250ZXh0LnNob3J0VGVybU1lbW9yeSJ9]]",
+  knowledgeSearchBehavior: "onDemand",
+  knowledgeSearchAlwaysWarning: "",
+  knowledgeSearchTags: "",
+  knowledgeSearchTagsFilterOp: "and",
+  knowledgeSearchAiAgentKnowledge: true,
+  knowledgeSearchJobKnowledge: false,
+  knowledgeSearchGenerateSearchPrompt: true,
+  knowledgeSearchTopK: 3,
+  knowledgeSearchJobStore: "",
+  apiVersion: "1.0",
+  timeoutInMs: 8000,
+  maxTokens: 4000,
+  temperature: 0.7,
+  useTextAlternativeForLLM: true,
+  advancedLogging: false,
+  loggingWebhookUrl: "",
+  loggingCustomData: "",
+  loggingHeaders: "{}",
+  conditionForLogging: "",
+  logErrorToSystem: false,
+  storeErrorInInput: true,
+  errorHandling: "continue",
+  errorMessage: "",
+  errorHandlingGotoTarget: "",
+  debugLogTokenCount: false,
+  debugLogSystemPrompt: false,
+  debugLogToolDefinitions: false,
+  debugResult: false,
+  debugConfig: true,
+  debugLogLLMLatency: false,
+  storeLocation: "stream",
+  streamStoreCopyInInput: true,
+  inputKey: "aiAgentOutput",
+  contextKey: "aiAgentOutput",
+  outputImmediately: true,
+  streamStopTokens: [".", "!", "?", "\\n"],
+  processImages: false,
+  transcriptImageHandling: "minify",
+  voiceSetting: "inheritFromAiAgent",
+  ttsVendor: "",
+  ttsLanguage: "",
+  ttsModel: "",
+  ttsVoice: "",
+  ttsLabel: "",
+  ttsDisableCache: false,
+};
+
+const DEFAULT_AI_AGENT_SAFETY = {
+  avoidHarmfulContent: true,
+  avoidUngroundedContent: true,
+  avoidCopyrightInfringements: true,
+  preventJailbreakAndManipulation: true,
+};
+
+const DEFAULT_VOICE_CONFIG = {
+  sttVendor: "deepgramflux",
+  sttLanguage: "en-US",
+  sttModel: "nova-3",
+  ttsVendor: "elevenlabs",
+  ttsLanguage: "en",
+  ttsModel: "eleven_multilingual_v2",
+  bargeIn: false,
+  endpointing: 250,
+  noInputTimeout: 10000,
+  dtmfEnable: false,
+};
+
+module.exports = {
+  DEFAULT_COGNIGY_VERSION,
+  DEFAULT_FLOW_SETTINGS,
+  DEFAULT_AI_AGENT_JOB_CONFIG,
+  DEFAULT_AI_AGENT_SAFETY,
+  DEFAULT_VOICE_CONFIG,
+};
