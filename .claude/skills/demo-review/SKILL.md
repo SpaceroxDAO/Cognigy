@@ -1,11 +1,11 @@
 ---
 name: demo-review
-description: Load when reviewing a demo transcript or session logs, QA testing a demo, analyzing agent behavior, or identifying issues to fix before delivery.
+description: "Review demo transcripts, session logs, or QA-test a demo before delivery. Use this whenever the user pastes a conversation, shares agent logs, asks 'how did that go', 'what went wrong', or wants to identify issues -- even partial transcripts or single tool-call snippets."
 user-invocable: false
 dependencies: [tool-design, instruction-patterns]
 ---
 
-# Demo Review — Structured QA from Transcripts & Logs
+# Demo Review -- Structured QA from Transcripts & Logs
 
 ## How to Review
 
@@ -13,7 +13,7 @@ The user will paste either:
 - **Transcript**: The interaction panel showing agent/user messages and tool calls
 - **Session logs**: Raw Cognigy logs with timestamps, traceIds, flowIds, and message payloads
 
-Both contain the same conversation — logs have more technical detail (streaming chunks, tool_calls finishReason, sessionConfig payloads). Use whichever is provided.
+Both contain the same conversation -- logs have more technical detail (streaming chunks, tool_calls finishReason, sessionConfig payloads). Use whichever is provided.
 
 ## Review Checklist
 
@@ -23,10 +23,10 @@ Run through every section below for each review. Report findings as a table with
 
 For every tool call in the transcript:
 - Did the answer contain real data, or did the AI say "didn't load correctly" / "isn't available" / "let me connect you to someone"?
-- If the AI offered to transfer instead of answering, the tool answer likely resolved to empty strings
+- If the AI offered to transfer instead of answering, the tool answer likely resolved to empty strings -- check for broken template paths in the answer field.
 - Check: was there a `_finishReason: "tool_calls"` followed by actual data in the next message?
 
-**Common failure**: Answer template uses array access (`{{context.list.0.field}}`) or nested paths that resolve to empty. Fix: flatten to `context.xxxResult` string in code node.
+**Common failure**: Answer template uses array access (`{{context.list.0.field}}`) or nested paths that resolve to empty. Fix: flatten to `context.xxxResult` string in code node (see `tool-design` skill for patterns and examples).
 
 ### 2. Data Accuracy (is the data correct?)
 
@@ -101,7 +101,7 @@ For each tool that returned data:
 Structure your review as:
 
 ```
-## Demo Review: [Demo Name] — [Date]
+## Demo Review: [Demo Name] -- [Date]
 
 ### Summary
 [1-2 sentence overall assessment]
@@ -114,7 +114,7 @@ Structure your review as:
 | ... | ... | ... | ... | ... |
 
 ### Issues Found
-1. **[Severity: Critical/Medium/Minor]** — [Description of issue]
+1. **[Severity: Critical/Medium/Minor]** -- [Description of issue]
    - **What happened**: [exact quote from transcript]
    - **Expected**: [what should have happened]
    - **Fix**: [what to change in the build script]
@@ -128,30 +128,30 @@ Structure your review as:
 
 ## Severity Guide
 
-- **Critical**: Tool returns empty data, AI hallucinates answers, greeting is wrong, auth bypassed — blocks delivery
-- **Medium**: AI asks 2 questions in one turn, response too long for voice, missed a follow-up opportunity — should fix before demo
-- **Minor**: Slightly awkward phrasing, could use better filler words, minor pronunciation concern — nice to fix
+- **Critical**: Tool returns empty data, AI hallucinates answers, greeting is wrong, auth bypassed -- blocks delivery
+- **Medium**: AI asks 2 questions in one turn, response too long for voice, missed a follow-up opportunity -- should fix before demo
+- **Minor**: Slightly awkward phrasing, could use better filler words, minor pronunciation concern -- nice to fix
 
 ## What to Check in Logs vs Transcript
 
 **Logs show things transcripts don't:**
-- `_finishReason: "tool_calls"` — confirms a tool was actually called (not just the AI saying it did something)
-- `_finishReason: "stop"` — normal text response, no tool call
-- Streaming chunks — you can see the exact text pieces the AI generated in sequence
-- `voiceGateway2Config` — confirms TTS/STT settings are correct (vendor, model, voice ID, endpointing)
-- `sessionId` — confirms all messages are from the same session
-- Timing — gaps between messages show response latency
+- `_finishReason: "tool_calls"` -- confirms a tool was actually called (not just the AI saying it did something)
+- `_finishReason: "stop"` -- normal text response, no tool call
+- Streaming chunks -- you can see the exact text pieces the AI generated in sequence
+- `voiceGateway2Config` -- confirms TTS/STT settings are correct (vendor, model, voice ID, endpointing)
+- `sessionId` -- confirms all messages are from the same session
+- Timing -- gaps between messages show response latency
 
 **Red flags in logs:**
-- Multiple `tool_calls` in a row without a text response between them — tool chain may be broken
-- Very long text in a single message chunk — response too verbose for voice
-- `text: null` with only `data` — session config, not a spoken response (expected at start)
-- Missing `tool_calls` finishReason when the transcript shows "AI Agent: Tool Call" — possible mismatch
+- Multiple `tool_calls` in a row without a text response between them -- tool chain may be broken
+- Very long text in a single message chunk -- response too verbose for voice
+- `text: null` with only `data` -- session config, not a spoken response (expected at start)
+- Missing `tool_calls` finishReason when the transcript shows "AI Agent: Tool Call" -- possible mismatch
 
 ## Lessons from Past Reviews
 
 ### Office Depot v1 (all tools broken)
-- **Root cause**: Answer templates used `{{context.customer.recentOrders.0.orderId}}` — array index access doesn't resolve in Cognigy
+- **Root cause**: Answer templates used `{{context.customer.recentOrders.0.orderId}}` -- array index access doesn't resolve in Cognigy
 - **Symptom**: AI said "details didn't load correctly" and offered to transfer for EVERY tool
 - **Fix**: Flatten all data into `context.xxxResult` strings in code nodes, answer is just `{{context.xxxResult}}`
 

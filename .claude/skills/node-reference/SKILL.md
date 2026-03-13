@@ -1,6 +1,6 @@
 ---
 name: node-reference
-description: Load when looking up a Cognigy node type's config fields, extension name, or localizedData schema. Covers all node types used in AI Agent flows.
+description: "Look up any Cognigy node type's config fields, extension name, or localizedData schema. Use this whenever you need to know what fields a node type expects, what extension it belongs to, or how to configure a specific node -- covers all node types used in AI Agent flows including aiAgentJob, code, say, setSessionConfig, and tool nodes."
 user-invocable: false
 dependencies: []
 source-files: [credit-card-analysis/nodeData/]
@@ -30,7 +30,7 @@ source-files: [credit-card-analysis/nodeData/]
 | Type | Config |
 |------|--------|
 | `code` | code(JS string) |
-| `if` | condition(CognigyScript expression) — children: [then, else] |
+| `if` | condition(CognigyScript expression) -- children: [then, else] |
 | `then` | `{}` (child of if) |
 | `else` | `{}` (child of if) |
 | `goTo` | targetFlowId, targetNodeId |

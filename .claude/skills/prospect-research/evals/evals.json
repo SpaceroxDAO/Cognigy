@@ -1,0 +1,23 @@
+{
+  "skill_name": "prospect-research",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "What does Cigna do? I need to build a demo for them next week",
+      "expected_output": "Researches Cigna's products, support workflows, terminology, and IVR structure",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Can you look up Best Buy's return policy and rewards program for the demo?",
+      "expected_output": "WebSearches Best Buy FAQ/policy pages, scrapes content, produces Scraped Knowledge Summary",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Build a demo for Verizon",
+      "expected_output": "Starts with prospect research phase before building -- researches Verizon's support workflows and terminology",
+      "files": []
+    }
+  ]
+}

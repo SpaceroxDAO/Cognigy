@@ -1,0 +1,23 @@
+{
+  "skill_name": "demo-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Here's the transcript from today's demo run -- how did it go? [pastes transcript]",
+      "expected_output": "Runs full review checklist: tool resolution, data accuracy, conversation flow, voice readiness, edge cases",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "The agent said 'details didn't load correctly' for every tool call -- what happened?",
+      "expected_output": "Identifies broken answer templates with array/nested access, recommends flattening to context.xxxResult",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Can you check these session logs? The agent seems to be calling authenticate twice",
+      "expected_output": "Reviews logs for duplicate tool_calls finishReason entries, checks if idempotent mock code handles re-auth",
+      "files": []
+    }
+  ]
+}

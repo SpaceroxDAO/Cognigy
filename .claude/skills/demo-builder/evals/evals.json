@@ -1,0 +1,23 @@
+{
+  "skill_name": "demo-builder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build a demo for Humana -- they do Medicare Advantage plans and want to show automated member support",
+      "expected_output": "Triggers full end-to-end demo build: research Humana, design tools, write spec, build package",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Create a package for a retail company that handles order tracking and returns",
+      "expected_output": "Starts demo-builder process with retail tool set pattern",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I need a working demo ZIP by end of day for a prospect meeting tomorrow",
+      "expected_output": "Triggers demo-builder with urgency, follows full process but efficiently",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "skill_name": "cognigy-package-format",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Can you show me what's inside this ZIP? The flow imported but some tools are missing",
+      "expected_output": "Inspects ZIP contents, traces chart relations to identify missing nodeData files",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "How do the IDs in chart.json connect to the nodeData files?",
+      "expected_output": "Explains cross-reference map: chart.relations[].node -> nodeData._id, flow.chartReference -> chart._id",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The flow imported but node connections are broken -- tools aren't connected to the AI Agent Job",
+      "expected_output": "Checks aiAgentJob children array in chart relations for missing tool branch entries",
+      "files": []
+    }
+  ]
+}

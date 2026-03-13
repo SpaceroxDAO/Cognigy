@@ -1,0 +1,23 @@
+{
+  "skill_name": "instruction-patterns",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "The agent isn't following any of the rules I wrote -- it gives long responses and asks multiple questions",
+      "expected_output": "Checks that agentJobConfig.instructions references {{context.instructions}}, verifies ALWAYS/NEVER rules are present",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Write the context.instructions and context.knowledge for a dental insurance demo",
+      "expected_output": "Produces instructions with #INTRO, #RULES (standard voice rules from reference file), #TOOL ORDER, and domain-specific rules",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The agent reads 'hashtag INTRO' and 'asterisk asterisk ALWAYS' out loud during the demo",
+      "expected_output": "Identifies markdown in agent-facing content, strips formatting to plain text",
+      "files": []
+    }
+  ]
+}

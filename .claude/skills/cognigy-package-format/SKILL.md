@@ -1,6 +1,6 @@
 ---
 name: cognigy-package-format
-description: Load when debugging package import errors, inspecting ZIP contents, understanding nodeData/chart/flow JSON structure, or tracing ID cross-references between package files.
+description: "Debug package import errors, inspect ZIP contents, or trace ID cross-references between nodeData/chart/flow/locale files. Use this whenever you see broken imports, need to understand the JSON structure inside a package, or are troubleshooting why a node or relation is missing -- even if the symptom is just 'flow looks wrong after import'."
 user-invocable: false
 dependencies: [node-reference]
 source-files: [credit-card-analysis/]
@@ -9,7 +9,7 @@ source-files: [credit-card-analysis/]
 # Cognigy Package Format
 
 ## ZIP Creation (CRITICAL)
-ZIP must have NO directory entries — only flat file paths. Cognigy's parser fails on empty directory entries.
+ZIP must have NO directory entries -- only flat file paths. Cognigy's parser fails on empty directory entries with "Package Extraction Failed".
 ```bash
 # CORRECT:
 find . -type f | sed 's|^\./||' | zip -D -@ output.zip
@@ -34,9 +34,9 @@ package.zip/
 ```
 
 ## ID System
-- `_id`: MongoDB ObjectId (24 hex chars) — used as file names
-- `referenceId`: UUID v4 — used for cross-resource references
-- All resources share `projectReference` and `organisationReference`
+- `_id`: MongoDB ObjectId (24 hex chars) -- used as file names and as the primary key for every resource in the package
+- `referenceId`: UUID v4 -- used for cross-resource references that survive re-import (IDs change on import, referenceIds don't)
+- All resources share `projectReference` and `organisationReference` -- these get remapped to the target org on import
 
 ## Cross-Reference Map
 ```
@@ -50,6 +50,7 @@ flowSettings.flowReference → flow._id
 intentTrainGroup.flowReference → flow._id
 aiAgentJob.config.aiAgent  → aiAgent.referenceId (UUID)
 ```
+If any of these references point to a missing file, the import succeeds but the flow is broken -- nodes disappear or connections are missing.
 
 ## Chart Relations Structure
 Each entry in `chart.relations[]`:
@@ -71,7 +72,7 @@ Each entry in `chart.relations[]`:
 ```json
 {"cognigyVersion":"2026.4.0","type":"package","createdAt":"ISO","name":"...","description":"","resourcesHash":"40hex"}
 ```
-**WARNING**: Do NOT include `knowledgeData` — it's not in working packages and may cause import failure.
+**WARNING**: Do NOT include `knowledgeData` -- it's not in working packages and may cause import failure.
 
 ### nodeData (common fields)
 ```json
@@ -85,5 +86,5 @@ Each entry in `chart.relations[]`:
   "resourceReference":"flowId","projectReference":"...","organisationReference":"..."
 }
 ```
-**WARNING**: `mock` field is REQUIRED on every node — missing it causes import failure.
+**WARNING**: `mock` field is REQUIRED on every node -- missing it causes import failure.
 **Code nodes**: When `config.code` has content, include `hasError: false` and `transpiled: "<same code>"` in config.

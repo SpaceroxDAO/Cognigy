@@ -1,0 +1,23 @@
+{
+  "skill_name": "node-reference",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "What config fields does the aiAgentJob node need?",
+      "expected_output": "Lists aiAgentJob config: aiAgent, name, description, instructions, toolChoice, memoryType, storeLocation, outputImmediately, temperature, maxTokens, timeoutInMs",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "What extension does the setSessionConfig node belong to?",
+      "expected_output": "Identifies @cognigy/voicegateway2 as the extension for voice nodes",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I need to add an if/then/else branch -- what's the node structure?",
+      "expected_output": "Explains if node with condition field, children: [then, else] structure",
+      "files": []
+    }
+  ]
+}

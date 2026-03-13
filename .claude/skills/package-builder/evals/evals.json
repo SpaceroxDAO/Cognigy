@@ -1,0 +1,23 @@
+{
+  "skill_name": "package-builder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm getting 'Package Extraction Failed' when I try to import the ZIP",
+      "expected_output": "Diagnoses directory entries in ZIP, fixes with find/zip -D command",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Write a build script for the Allstate demo with 5 tools",
+      "expected_output": "Creates build-allstate.js using cloneAndModify() with proper spec structure",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The package imported but the flow is completely empty -- no nodes visible",
+      "expected_output": "Checks chart relations for missing nodeData references, validates cross-references",
+      "files": []
+    }
+  ]
+}

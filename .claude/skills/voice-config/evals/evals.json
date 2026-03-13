@@ -1,0 +1,23 @@
+{
+  "skill_name": "voice-config",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "The agent is talking way too fast and there's a long silence before it responds -- can we fix that?",
+      "expected_output": "Checks streaming config and silence overlay settings",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need to change the STT to Deepgram Nova-3 and add a typing sound during processing",
+      "expected_output": "Updates SetSessionConfig values for STT model and silence overlay",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The agent keeps cutting off the caller mid-sentence",
+      "expected_output": "Disables bargeIn, adjusts endpointing to 250ms",
+      "files": []
+    }
+  ]
+}

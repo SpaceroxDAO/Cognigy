@@ -1,0 +1,23 @@
+{
+  "skill_name": "tool-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "The order_status tool is returning empty data -- the agent keeps saying 'details didn't load correctly'",
+      "expected_output": "Identifies broken answer template (likely array/nested path), fixes to flatten to context.orderResult",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need to add a prescription_refill tool to the healthcare demo",
+      "expected_output": "Designs tool with schema, mock code flattening to context.refillResult, and answer template",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "The AI keeps calling returns instead of order_status when I ask about my order",
+      "expected_output": "Identifies overlapping tool descriptions, rewrites to make triggers mutually exclusive",
+      "files": []
+    }
+  ]
+}

@@ -9,32 +9,42 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
 You are building a Cognigy.AI demo package for a prospect using the **clone-and-modify** approach.
 
 **BEFORE YOU START**: Load the following skills by reading them (they contain mandatory templates and rules):
-1. `instruction-patterns` — Standard voice rules (ALWAYS/NEVER/Confirmation) that MUST be in every demo
-2. `tool-design` — Tool schemas, mock code patterns, answer patterns
-3. `package-builder` — cloneAndModify() usage, spec format, validation
-4. `voice-config` — TTS/STT settings, pronunciation rules
+1. `demo-builder` — The orchestrator: full end-to-end process, phases, proven patterns
+2. `prospect-research` — Research checklist + Web Research & Scraping protocol
+3. `instruction-patterns` — Standard voice rules (ALWAYS/NEVER/Confirmation) that MUST be in every demo
+4. `tool-design` — Tool schemas, mock code patterns, answer patterns
+5. `package-builder` — cloneAndModify() usage, spec format, validation
+6. `voice-config` — TTS/STT settings, pronunciation rules
 
-## Step 1: Gather Context
+**Follow the `demo-builder` skill's 6-phase process.** The steps below are a summary — the skill has the full details.
+
+## Phase 1: Gather Context & Research
 Ask the user for (if not already provided):
 - **Company name** and industry
 - **Use case** (customer support, intake, sales, IT helpdesk, etc.)
 - **Channel** (voice, webchat, or both)
-- **Tools needed** (authentication, account lookup, scheduling, payments, escalation, etc.)
 - **Any domain-specific rules** (compliance, terminology, etc.)
 
 Note: The agent persona name is always **Jane** (standard for all demos).
 
-## Step 2: Research (if needed)
-If the user provides a company website, use WebFetch to gather:
-- Company description and branding tone
-- Products/services offered
-- Common customer support scenarios
-- Industry-specific terminology
+**Then run the Web Research & Scraping protocol** from the `prospect-research` skill:
+- Auto-discover FAQ, support, policy, and product pages via WebSearch
+- Scrape real content from each discovered URL via WebFetch
+- Compile the **Scraped Knowledge Summary** and present it to the user for review
+- **Wait for user approval** before proceeding to Phase 2
 
-## Step 3: Write the Build Script
+## Phase 2: Design the Tool Set
+Pick 4-7 tools following the pattern in the `demo-builder` skill:
+- `authenticate` always first, `agent_handover` always last
+- 2-5 domain tools in between based on the use case
+- Load the `tool-design` skill for schema and mock data patterns
+
+## Phase 3: Write the Build Script
 Create a build script (e.g., `build-[company].js`) using `clone-and-modify.js`.
 
 **CRITICAL**: The `instructionsCode` MUST include the standard ALWAYS/NEVER/Confirmation rules from the `instruction-patterns` skill. These are mandatory for every demo — copy them verbatim, then add demo-specific rules after.
+
+**For `knowledgeCode`**: Use the approved Scraped Knowledge Summary as the primary source. Follow the synthesis rules in the `instruction-patterns` skill ("Writing context.knowledge from Scraped Content").
 
 ```javascript
 const { cloneAndModify } = require("./cognigy-package-generator/clone-and-modify");
@@ -57,13 +67,13 @@ const spec = {
 cloneAndModify("./credit-card-analysis", spec, "./Company-Demo.zip");
 ```
 
-## Step 4: Build and Validate
+## Phase 4: Build and Validate
 ```bash
 node build-[company].js
 unzip -l ./Company-Demo.zip | head -5   # Verify NO directory entries (no size-0 lines)
 ```
 
-## Step 5: Summarize
+## Phase 5: Deliver
 Tell the user:
 - Package location
 - Flow name and structure

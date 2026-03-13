@@ -1,30 +1,29 @@
 ---
 name: demo-builder
-description: Load when building a new Cognigy demo package end-to-end, creating a demo for a prospect, or running the /create-demo workflow. Covers research, spec, build, validate, deliver.
+description: "Build a Cognigy demo package end-to-end: research, spec, build, validate, deliver. Use this whenever the user wants to create a demo for a prospect, says 'build a demo', 'create a package', runs /create-demo, or names a company and implies they need a working demo -- even if they skip saying 'end-to-end'."
 user-invocable: false
 dependencies: [prospect-research, tool-design, instruction-patterns, voice-config, package-builder]
 source-files: [build-office-depot.js]
 ---
 
-# Demo Builder — End-to-End Process
+# Demo Builder -- End-to-End Process
 
 ## NEVER
-- Never use the old `buildPackage()` / `writePackageZip()` API — it produces broken packages.
-- Never start building without understanding the prospect's actual terminology and workflow.
-- Never create more than 8 tools — the LLM gets confused with too many choices.
-- Never create tools that overlap in purpose — the LLM won't know which to call.
-- Never skip the validation step — import failures waste the user's time.
-- Never use generic placeholder data — make mock data feel real (real addresses, realistic order numbers, plausible dollar amounts).
-- Never give the agent medical, legal, financial, or insurance advice capabilities — always escalate.
+- Never use the old `buildPackage()` / `writePackageZip()` API -- it produces packages that fail import because it doesn't generate required fields like `mock` and `transpiled`.
+- Never start building without understanding the prospect's actual terminology and workflow -- generic demos don't impress prospects and get details wrong.
+- Never create more than 7 tools -- the LLM gets confused with too many choices and starts calling the wrong one or skipping tools entirely.
+- Never skip the validation step -- import failures waste the user's time and require a rebuild.
+- Never use generic placeholder data -- make mock data feel real (real addresses, realistic order numbers, plausible dollar amounts) because prospects notice fake-looking data immediately.
+- Never give the agent medical, legal, financial, or insurance advice capabilities -- always escalate, because even in a demo, prospects will test these boundaries and a wrong answer kills credibility.
 
 ## ALWAYS
-- Always research the prospect's real products, terminology, and customer workflows.
-- Always have `authenticate` as tool #1 and `agent_handover` as the last tool.
-- Always use "Adam Boyle" as the demo persona (the user's testing identity).
-- Always include the standard ALWAYS/NEVER/Confirmation voice rules from the `instruction-patterns` skill in every demo's #RULES section.
-- Always use the clone-and-modify approach with `credit-card-analysis/` as source.
-- Always make the greeting specific: "Thank you for calling [Company]! This is Jane..."
-- Always include a FAQ/knowledge code node — agents with knowledge give dramatically better demos.
+- Always research the prospect's real products, terminology, and customer workflows -- the demo must speak their language to land.
+- Always use "Adam Boyle" as the demo persona (the user's testing identity) -- this keeps all demos consistent and testable.
+- Always include the standard ALWAYS/NEVER/Confirmation voice rules from the `instruction-patterns` skill in every demo's #RULES section -- these are non-negotiable for voice quality.
+- Always use the clone-and-modify approach with `credit-card-analysis/` as source -- building from scratch misses dozens of hidden required fields.
+- Always make the greeting specific: "Thank you for calling [Company]! This is Jane..." -- generic greetings feel like a template, not a custom demo.
+- Always include a FAQ/knowledge code node -- agents with knowledge give dramatically better demos because they can answer follow-up questions without hallucinating.
+- For tool ordering rules (authenticate first, agent_handover last), see `tool-design` skill for full tool design patterns.
 
 ## Process
 
@@ -36,12 +35,18 @@ Gather before building:
 - Current IVR/phone tree structure (what are we replacing?)
 - Tone and culture (formal bank vs. casual retail)
 
+**Then run the Web Research & Scraping protocol** from the `prospect-research` skill:
+- Auto-discover FAQ, support, policy, and product pages via WebSearch
+- Scrape real content from each discovered URL via WebFetch
+- Compile the Scraped Knowledge Summary
+- **Checkpoint**: Present the Scraped Knowledge Summary to Adam for review before proceeding to Phase 2 (Tool Design)
+
 ### 2. Design the Tool Set
 Pick 4-7 tools following this pattern:
 ```
-1. authenticate         — Always first, verify identity
-2-6. [domain tools]     — The core scenarios
-7. agent_handover       — Always last, human escalation
+1. authenticate         -- Always first, verify identity
+2-6. [domain tools]     -- The core scenarios
+7. agent_handover       -- Always last, human escalation
 ```
 
 **Good tool sets by industry:**
@@ -56,16 +61,18 @@ Create a build script following `build-office-depot.js` as the reference. The sp
 
 **instructionsCode** (the main prompt):
 ```
-#INTRO        — Who you are (Jane), exact greeting script
-#RULES        — Standard ALWAYS/NEVER/Confirmation rules (from instruction-patterns skill) + demo-specific rules
-#TOOL ORDER   — Numbered tool list with when to use each
-#DOMAIN RULES — Industry-specific constraints
+#INTRO        -- Who you are (Jane), exact greeting script
+#RULES        -- Standard ALWAYS/NEVER/Confirmation rules (from instruction-patterns skill) + demo-specific rules
+#TOOL ORDER   -- Numbered tool list with when to use each
+#DOMAIN RULES -- Industry-specific constraints
 ```
-**CRITICAL**: Load the `instruction-patterns` skill and copy the standard voice rules verbatim into #RULES. These are mandatory for every demo.
+**CRITICAL**: Load the `instruction-patterns` skill and copy the standard voice rules verbatim from `instruction-patterns/references/standard-voice-rules.md` into #RULES. These are mandatory for every demo.
 
 **knowledgeCode** (FAQ content):
-- 3-5 topic sections as Q&A or reference material
-- Covers the most likely questions for this industry
+- Use scraped content from the Scraped Knowledge Summary as the primary source
+- Organize into 3-5 sections matching the demo's tool set
+- Preserve real details: actual policy timeframes, real product names, actual hours
+- Only fabricate data for things that MUST be demo-specific (account numbers, order IDs)
 - Used by the AI Agent via `{{context.knowledge}}`
 
 **Mock data** (in authenticate tool's code):
@@ -104,7 +111,7 @@ When the conversation starts, greet the caller warmly: "Thank you for calling [C
 #RULES
 ## Conversation & Tool Guidelines
 
-[PASTE STANDARD ALWAYS/NEVER/CONFIRMATION RULES FROM instruction-patterns SKILL HERE]
+[PASTE STANDARD ALWAYS/NEVER/CONFIRMATION RULES FROM instruction-patterns/references/standard-voice-rules.md]
 
 [Then add demo-specific rules below:]
 
@@ -118,7 +125,7 @@ N. agent_handover -- Transfer when needed
 - [Industry/company-specific constraints]
 `;
 ```
-**NOTE**: The example above is abbreviated. The full standard ALWAYS/NEVER/Confirmation rules are in the `instruction-patterns` skill — load it and copy them verbatim into #RULES for every demo.
+**NOTE**: The example above is abbreviated. The full standard ALWAYS/NEVER/Confirmation rules are in `instruction-patterns/references/standard-voice-rules.md` -- load it and copy them verbatim into #RULES for every demo.
 
 ### agentJobConfig.instructions pattern
 ```

@@ -1,6 +1,6 @@
 ---
 name: voice-config
-description: Load when configuring TTS, STT, voice settings, pronunciation rules, silence overlay, barge-in, DTMF, no-input timeout, or SetSessionConfig node values.
+description: "Configure TTS/STT, pronunciation, silence overlay, barge-in, DTMF, no-input timeout, or SetSessionConfig values for voice demos. Use this skill whenever the task involves voice output, audio settings, anything spoken aloud by the agent, or phrases like 'it sounds weird' or 'the agent talks too fast' -- even if the user doesn't say 'voice config'."
 user-invocable: false
 dependencies: [node-reference]
 source-files: [credit-card-analysis/nodeData/]
@@ -9,24 +9,24 @@ source-files: [credit-card-analysis/nodeData/]
 # Voice Configuration
 
 ## NEVER
-- Never use em dashes (—) in agent instructions or answers — TTS reads them as "dash" or pauses awkwardly.
-- Never use markdown, bullet points, or numbered lists in voice output — TTS reads the formatting characters.
-- Never use emojis in any voice-facing content.
-- Never spell out URLs — say "I can send you a text with that link" instead.
-- Never give more than 3 sentences in a single voice response — callers lose track.
-- Never ask more than one question per turn.
-- Never set `bargeIn: true` unless the demo specifically requires it — it causes false triggers.
-- Never use `sttModel: "default"` — always specify the exact model (e.g., `nova-3`).
+- Never use em dashes (the long dash character) in agent instructions or answers -- TTS reads them as "dash" or pauses awkwardly. Use commas or short sentences instead.
+- Never use markdown, bullet points, or numbered lists in voice output -- TTS reads the formatting characters aloud ("asterisk", "hash", "dash").
+- Never use emojis in any voice-facing content -- TTS either skips them or reads their Unicode names.
+- Never spell out URLs -- say "I can send you a text with that link" instead, because TTS mangles URLs into gibberish.
+- Never give more than 3 sentences in a single voice response -- callers lose track after 3 sentences and stop listening.
+- Never ask more than one question per turn -- callers can only answer one thing at a time, and multi-question turns confuse STT.
+- Never set `bargeIn: true` unless the demo specifically requires it -- it causes false triggers where background noise or the agent's own audio cuts off the response.
+- Never use `sttModel: "default"` -- always specify the exact model (e.g., `nova-3`), because "default" maps to an older, less accurate model.
 
 ## ALWAYS
-- Always use the proven voice stack: Deepgram Nova-3 STT + ElevenLabs eleven_multilingual_v2 TTS.
-- Always set `endpointing: 250` (milliseconds of silence before STT finalizes).
-- Always set `userNoInputTimeout: 10000` (10 seconds before no-input event).
-- Always say numbers digit by digit for order/reference numbers: "Order 1-2-3-4-5-6."
-- Always say dollar amounts naturally: "twelve dollars and ninety-nine cents."
-- Always say phone numbers in groups: "area code 8-4-8, 4-6-6, 8-8-2-5."
-- Always include company-specific pronunciation guidance in instructions (company name, product names, etc.).
-- Always use `silenceOverlayAction: true` with a subtle keyboard/typing sound URL to fill processing gaps.
+- Always use the proven voice stack: Deepgram Nova-3 STT + ElevenLabs eleven_multilingual_v2 TTS -- this combination has been tested across all 13 demos and consistently produces the best quality.
+- Always set `endpointing: 250` (milliseconds of silence before STT finalizes) -- lower values cut off callers mid-sentence, higher values add noticeable lag.
+- Always set `userNoInputTimeout: 10000` (10 seconds before no-input event) -- shorter timeouts trigger while callers are still thinking.
+- Always say numbers digit by digit for order/reference numbers: "Order 1-2-3-4-5-6" -- grouping digits prevents TTS from reading them as large numbers.
+- Always say dollar amounts naturally: "twelve dollars and ninety-nine cents" -- TTS mangles "$12.99" into inconsistent readings.
+- Always say phone numbers in groups: "area code 8-4-8, 4-6-6, 8-8-2-5" -- this matches how people naturally say and hear phone numbers.
+- Always include company-specific pronunciation guidance in instructions (company name, product names, etc.) -- TTS often mispronounces brand names without explicit guidance.
+- Always use `silenceOverlayAction: true` with a subtle keyboard/typing sound URL to fill processing gaps -- dead silence makes callers think the call dropped.
 
 ## SetSessionConfig Reference (68 keys in production)
 
@@ -65,14 +65,14 @@ outputImmediately: true          # Start TTS before full response is ready
 streamStopTokens: [".", "!", "?", "\n"]   # Flush at sentence boundaries
 ```
 
-This makes voice responses feel natural — the agent starts speaking as soon as the first sentence is ready, rather than waiting for the entire LLM response.
+This makes voice responses feel natural -- the agent starts speaking as soon as the first sentence is ready, rather than waiting for the entire LLM response.
 
 ## Post-Import Voice Setup
 
 After importing a package, the user needs to:
-1. **Set TTS voice** — the `ttsVoice` ID in setSessionConfig (ElevenLabs voice ID)
-2. **Set LLM provider** — the `llmProviderReferenceId` in the AI Agent Job config
-3. **Verify AI Agent name** — should already be "Jane" (standard for all demos)
+1. **Set TTS voice** -- the `ttsVoice` ID in setSessionConfig (ElevenLabs voice ID)
+2. **Set LLM provider** -- the `llmProviderReferenceId` in the AI Agent Job config
+3. **Verify AI Agent name** -- should already be "Jane" (standard for all demos)
 
 ## What Breaks in Voice Demos
 

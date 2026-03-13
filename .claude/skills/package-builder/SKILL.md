@@ -1,31 +1,33 @@
 ---
 name: package-builder
-description: Load when calling cloneAndModify(), writing a build script, generating a ZIP package, debugging package import failures, or modifying clone-and-modify.js. Includes working examples, validation, and failure modes.
+description: "Call cloneAndModify(), write a build script, generate a ZIP, or debug package import failures. Use this whenever the task involves clone-and-modify.js, build-*.js scripts, ZIP validation, 'Package Extraction Failed' errors, or any step between having a spec and having an importable ZIP."
 user-invocable: false
 dependencies: [tool-design, cognigy-package-format]
 source-files: [cognigy-package-generator/clone-and-modify.js, build-office-depot.js]
+compatibility: { tools: [Bash] }
 ---
 
-# Package Builder — Clone-and-Modify
+# Package Builder -- Clone-and-Modify
 
 ## NEVER
-- Never use `buildPackage()` or `writePackageZip()` — they produce packages that fail import.
-- Never use `zip -r` — it creates directory entries that break Cognigy's parser.
-- Never add `knowledgeData` to index.json.
-- Never build nodeData from scratch — always clone from a working template node.
-- Never omit the `mock` field on any node.
-- Never set `hasError: true` on code nodes — always `false` or omit entirely.
-- Never put `transpiled` on a code node with empty `code` — only add it when code is non-empty.
-- Never guess field names or structures — read the source template node and clone it exactly.
+- Never use `buildPackage()` or `writePackageZip()` -- they produce packages that fail import because they miss required fields like `mock`, `transpiled`, and correct cross-references.
+- Never use `zip -r` -- it creates directory entries that break Cognigy's ZIP parser with "Package Extraction Failed".
+- Never add `knowledgeData` to index.json -- it's not in working packages and its presence causes silent import corruption.
+- Never build nodeData from scratch -- always clone from a working template node, because there are dozens of hidden required fields that aren't documented.
+- Never omit the `mock` field on any node -- Cognigy's import validator rejects nodes without it.
+- Never set `hasError: true` on code nodes -- Cognigy skips execution of error-flagged nodes, so the code silently never runs.
+- Never put `transpiled` on a code node with empty `code` -- only add it when code is non-empty, because an empty transpiled field with empty code triggers a validation warning.
+- Never guess field names or structures -- read the source template node and clone it exactly, because Cognigy's schema is strict and undocumented fields cause silent failures.
 
 ## ALWAYS
-- Always clone from `credit-card-analysis/` as the source template.
-- Always use `find . -type f | sed 's|^\./||' | zip -D -@ output.zip` for ZIP creation.
-- Always validate the output with `unzip -l` before delivering — zero directory entries allowed.
-- Always include `mock: {isEnabled: false, code: ""}` on every node (clone-and-modify handles this).
-- Always set `hasError: false` and `transpiled: "<same as code>"` on code nodes with content.
+- Always clone from `credit-card-analysis/` as the source template -- it's the only proven-working base package.
+- Always use `find . -type f | sed 's|^\./||' | zip -D -@ output.zip` for ZIP creation -- this is the only ZIP method that produces directory-entry-free archives Cognigy accepts.
+- Always validate the output with `unzip -l` before delivering -- zero directory entries allowed, because even one breaks import.
+- Always include `mock: {isEnabled: false, code: ""}` on every node (clone-and-modify handles this automatically).
+- Always set `hasError: false` and `transpiled: "<same as code>"` on code nodes with content -- without `transpiled`, Cognigy may skip execution or show a code error in the editor.
+- Flatten all tool data to `context.xxxResult` strings (see `tool-design` skill for patterns and examples).
 
-## Working Example (Office Depot — PROVEN)
+## Working Example (Office Depot -- PROVEN)
 
 ```javascript
 const { cloneAndModify } = require("./cognigy-package-generator/clone-and-modify");
@@ -63,7 +65,7 @@ cloneAndModify("./credit-card-analysis", {
         additionalProperties: false
       },
       code: "// Mock auth\ncontext.authenticated = true;\ncontext.customer = {...};",
-      answer: "Customer verified: {{context.customer.name}}..."
+      answer: "{{context.authResult}}"
     },
     // ... more tools (supports any number)
     {
@@ -71,7 +73,7 @@ cloneAndModify("./credit-card-analysis", {
       label: "Transfer to Agent",
       description: "Transfer to live human agent when needed.",
       parameters: { type: "object", properties: { reason: { type: "string" } }, required: ["reason"] },
-      code: "",           // Empty code is fine — tool answer handles it
+      code: "",           // Empty code is fine -- tool answer handles it
       answer: "Transferring to a live agent. Please hold."
     }
   ]
@@ -100,8 +102,8 @@ Each tool: aiAgentJobTool → Code → Resolve Tool Answer → (null)
 |-------|----------|-------------|
 | `flowName` | Yes | Name shown in Cognigy flow list |
 | `description` | No | Package description |
-| `instructionsCode` | Yes | JS setting `context.instructions` — the main prompt |
-| `knowledgeCode` | No | JS setting `context.knowledge` — FAQ content |
+| `instructionsCode` | Yes | JS setting `context.instructions` -- the main prompt |
+| `knowledgeCode` | No | JS setting `context.knowledge` -- FAQ content |
 | `agentJobConfig.name` | Yes | AI Agent Job name (e.g., "Customer Support Specialist") |
 | `agentJobConfig.description` | Yes | Job description for the LLM |
 | `agentJobConfig.instructions` | Yes | References to context vars (e.g., `Refer to {{context.instructions}}`) |
@@ -117,11 +119,11 @@ Each tool: aiAgentJobTool → Code → Resolve Tool Answer → (null)
 ### "Package Extraction Failed"
 **Cause**: ZIP contains directory entries.
 **Fix**: Use `find . -type f | sed 's|^\./||' | zip -D -@ output.zip`.
-**Verify**: `unzip -l output.zip` — no lines with size 0.
+**Verify**: `unzip -l output.zip` -- no lines with size 0.
 
 ### Package imports but flow is broken
 **Cause**: Chart relations don't match nodeData files.
-**Fix**: Run validation script — all chart node/children/next refs must exist in nodeData.
+**Fix**: Run validation script -- all chart node/children/next refs must exist in nodeData.
 
 ### AI Agent doesn't use tools
 **Cause**: `agentJobConfig.instructions` doesn't reference `{{context.instructions}}`.
