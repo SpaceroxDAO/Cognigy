@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN temp_password_expires_at timestamptz DEFAULT NULL;

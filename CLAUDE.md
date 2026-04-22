@@ -11,26 +11,34 @@ cognigy-package-generator/     # Node.js package generator
   lib/                         # Legacy sub-modules (kept for reference)
 credit-card-analysis/          # Extracted working base package (Credit Card Activation)
 build-office-depot.js          # Example: Office Depot IVA demo build script
+import-package.js              # Upload a ZIP to Cognigy.AI via REST API + auto-register in hub
+demo-hub/                      # Private React+Supabase demo portal (local)
+  scripts/register-demo.js     # Upsert a site-spec.json row into Supabase flows table
 ```
 
 ## How to Generate a Package (Clone-and-Modify)
 
 ```javascript
-const { cloneAndModify } = require("./cognigy-package-generator/clone-and-modify");
-cloneAndModify(
+const { cloneAndModify, DEFAULT_PERSONA } = require("./cognigy-package-generator/clone-and-modify");
+
+// Always destructure — return value is { zipPath, siteSpecPath }, not a string.
+const { zipPath, siteSpecPath } = cloneAndModify(
   "./credit-card-analysis",   // Source: extracted working package
   {
     flowName: "Demo Flow Name",
     description: "Package description",
-    instructionsCode: 'context.instructions = `...`;',
+    instructionsCode: 'context.instructions = `...`;',  // supports {{PERSONA_NAME}} etc.
     knowledgeCode: 'context.knowledge = `...`;',
-    agentJobConfig: { name: "Agent Name", description: "...", instructions: "..." },
+    agentJobConfig: { name: "Jane", description: "...", instructions: "..." },
+    persona: { ...DEFAULT_PERSONA },   // optional: override test persona per build
     tools: [
       { toolId: "tool_id", label: "Tool", description: "...", parameters: {...}, code: "...", answer: "..." }
     ]
   },
   "./output.zip"
 );
+// zipPath:      resolved path to the ZIP
+// siteSpecPath: resolved path to the *-site-spec.json for demo hub registration
 ```
 
 ## CRITICAL: Package Import Requirements
@@ -97,6 +105,10 @@ Skills are loaded on-demand. CLAUDE.md is always in context and acts as the rout
 | Adding voice-specific features (DTMF, barge-in, no-input) | `voice-config` + `node-reference` |
 | Reviewing a demo transcript or session logs | `demo-review` |
 | QA testing a demo before delivery | `demo-review` + `tool-design` |
+| Responding to an RFP, RFI, or vendor questionnaire | `rfp-responder` |
+| Filling out a procurement Excel questionnaire | `rfp-responder` |
+| Registering a demo in the demo hub / building a demo site | `demo-builder` + `package-builder` |
+| Working on `demo-hub/` (React frontend, Supabase, routing) | `package-builder` |
 
 ### Source File → Skill Lookup
 
@@ -120,6 +132,7 @@ Before modifying any source file, read the relevant skill first.
 - **`cognigy-package-format`** — ZIP structure, file schemas, cross-references. Debug reference.
 - **`demo-review`** — Structured QA from transcripts & logs. Checklist, severity guide, output format.
 - **`node-reference`** — All Cognigy node types and their config schemas.
+- **`rfp-responder`** — Fill RFP/RFI Excel questionnaires with NiCE+Cognigy answers using Python/openpyxl. Capability reference and company info in skill references/.
 
 ## Testing
 

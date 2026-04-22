@@ -29,6 +29,7 @@ source-files: [cognigy-package-generator/clone-and-modify.js]
 - Always make mock code idempotent -- calling the tool twice shouldn't break the demo, because the LLM sometimes retries tool calls.
 - Always set context variables in code nodes, then reference them in answers via `{{context.varName}}` -- this is the only reliable data flow path.
 - Always flatten all tool data to `context.xxxResult` strings -- see mock code patterns below for examples.
+- **Before finalizing any tool spec, scan every parameters block: if nothing is required, omit the `required` key entirely. Never write `required: []`.** This trips up every time -- the NEVER rule exists but empty arrays still get written. Delete it rather than leaving it empty.
 
 ## Tool Anatomy (3 nodes per tool)
 
@@ -132,6 +133,17 @@ The code node does all the work. The answer is just a single template variable.
 ```
 "Tell the user their card is activated and ready to use. Ask if there is anything else."
 ```
+
+### Instructional for multi-option results (CRITICAL -- use this when the result has 2+ next steps)
+When a tool result presents multiple options or resolution paths (e.g., a denial with two ways to appeal), use the instructional pattern to prevent the agent from listing both options in one turn -- which violates the "never list steps" voice rule.
+```javascript
+// Code node: include both options in the result string
+context.denialResult = "Claim denied. Code CO-97. Reason: no prior auth. Two resolution paths: retrospective prior auth submission, or ERISA appeal within sixty days.";
+
+// Answer: instruct the LLM to surface options one at a time
+answer: "{{context.denialResult}} Tell the caller there are two ways to resolve this, then ask which they'd like to explore first -- before describing either one."
+```
+This keeps the agent conversational instead of reading a list.
 
 ### BROKEN PATTERNS (DO NOT USE)
 ```

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Analyzer - Getting Started Guide</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+            --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-border: rgba(148, 163, 184, 0.2);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 30px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .back-link:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin: 35px 0 15px;
+            color: var(--text-primary);
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin: 25px 0 12px;
+            color: #6366f1;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin: 20px 0 10px;
+            color: var(--text-primary);
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-left: 4px solid #6366f1;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+
+        .tip-box p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .example-box {
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .example-box p {
+            margin: 5px 0;
+            color: var(--text-secondary);
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/token-analyzer-dashboard.html" class="back-link">← Back to Dashboard</a>
+        
+        <h1>Token Usage Analyzer - Getting Started Guide</h1>
+
+        <h2>Overview</h2>
+        <p>The Token Usage Analyzer provides real-world usage data for your AI Agent to help you estimate costs for LLM (Large Language Model), STT (Speech-to-Text), and TTS (Text-to-Speech) services. This dashboard aggregates actual usage metrics from your Cognigy AI Agent to give you accurate insights for budgeting and cost planning.</p>
+
+        <h2>Purpose</h2>
+        <p>Use this tool to:</p>
+        <ul>
+            <li><strong>Understand actual usage patterns</strong> across different time periods</li>
+            <li><strong>Estimate monthly/annual costs</strong> based on real usage data</li>
+            <li><strong>Identify high-usage flows</strong> that drive the majority of costs</li>
+            <li><strong>Track usage trends</strong> over time to forecast future expenses</li>
+            <li><strong>Make informed decisions</strong> about service tiers and pricing plans</li>
+        </ul>
+
+        <h2>How to Use the Dashboard</h2>
+
+        <h3>Step 1: Select Your Date Range</h3>
+        <ol>
+            <li>Navigate to the <strong>"Date Range Selection"</strong> section at the top of the dashboard</li>
+            <li>Select your <strong>From Date</strong> - the start of the period you want to analyze</li>
+            <li>Select your <strong>To Date</strong> - the end of the period you want to analyze</li>
+            <li>Click <strong>"Fetch Token Data"</strong> to retrieve and analyze usage data</li>
+        </ol>
+        <div class="tip-box">
+            <p><strong>Best Practices:</strong></p>
+            <ul style="margin: 10px 0 0 0;">
+                <li>Start with a recent 7-30 day period to understand current usage patterns</li>
+                <li>Use monthly periods (e.g., first day to last day of a month) for monthly cost estimation</li>
+                <li>Compare different time periods to identify trends and seasonal variations</li>
+            </ul>
+        </div>
+
+        <h3>Step 2: Review Your Usage Metrics</h3>
+        <p>Once the data loads, you'll see comprehensive usage statistics organized into several sections:</p>
+
+        <h2>Understanding Your Usage Data</h2>
+
+        <h3>LLM Usage Metrics</h3>
+        <p><strong>What it measures:</strong> The amount of AI processing (token consumption) your AI Agent performed.</p>
+        <h4>Key Metrics:</h4>
+        <ul>
+            <li><strong>Total LLM Input Tokens</strong>: Total tokens consumed from user inputs and context</li>
+            <li><strong>Total LLM Output Tokens</strong>: Total tokens generated in AI responses</li>
+            <li><strong>Total LLM Tokens</strong>: Combined input and output token usage</li>
+            <li><strong>Average LLM Tokens/Session</strong>: Average token consumption per conversation</li>
+            <li><strong>Avg LLM Tokens/Turn</strong>: Average token consumption per interaction</li>
+        </ul>
+        <div class="example-box">
+            <p><strong>Cost Estimation:</strong> Multiply total tokens by your LLM provider's per-token pricing to estimate costs. For example:</p>
+            <p>• If you used 1,000,000 tokens and your provider charges $0.002 per 1,000 tokens</p>
+            <p>• Estimated cost: 1,000,000 ÷ 1,000 × $0.002 = $2.00</p>
+        </div>
+
+        <h3>STT/TTS Usage Metrics</h3>
+        <p><strong>What it measures:</strong> Speech-to-Text (listening) and Text-to-Speech (speaking) usage.</p>
+        <h4>STT Metrics:</h4>
+        <ul>
+            <li><strong>Total STT</strong>: Overall speech-to-text usage</li>
+            <li><strong>Deepgram STT (minutes)</strong>: Total minutes of audio processed (Deepgram bills per minute)</li>
+        </ul>
+        <h4>TTS Metrics:</h4>
+        <ul>
+            <li><strong>Total TTS</strong>: Overall text-to-speech usage</li>
+            <li><strong>ElevenLabs TTS (characters)</strong>: Total characters converted to speech (ElevenLabs bills per character)</li>
+        </ul>
+        <div class="example-box">
+            <p><strong>Cost Estimation:</strong></p>
+            <p>• <strong>STT:</strong> Multiply total minutes by your STT provider's per-minute rate</p>
+            <p>• <strong>TTS:</strong> Multiply total characters by your TTS provider's per-character rate</p>
+        </div>
+
+        <h3>Session & Turn Metrics</h3>
+        <p><strong>What it measures:</strong> Conversation volume and engagement patterns.</p>
+        <h4>Key Metrics:</h4>
+        <ul>
+            <li><strong>Total Sessions</strong>: Number of unique conversations/interactions</li>
+            <li><strong>Total Conversation Turns</strong>: Total number of question-answer exchanges</li>
+            <li><strong>Avg Turns/Session</strong>: Average number of interactions per conversation</li>
+        </ul>
+        <div class="tip-box">
+            <p><strong>Business Value:</strong> Helps you understand user engagement levels, conversation complexity, peak usage periods, and resource requirements.</p>
+        </div>
+
+        <h3>Flow-Based Analysis</h3>
+        
+        <h4>Token Usage by Flow Chart</h4>
+        <p>A visual breakdown showing which parts of your AI Agent consume the most resources:</p>
+        <ul>
+            <li><strong>Blue bars</strong>: LLM token usage per flow</li>
+            <li><strong>Cyan bars</strong>: STT usage per flow</li>
+            <li><strong>Purple bars</strong>: TTS usage per flow</li>
+        </ul>
+        <div class="tip-box">
+            <p><strong>Use this to:</strong></p>
+            <ul style="margin: 10px 0 0 0;">
+                <li>Identify high-cost flows that may need optimization</li>
+                <li>Understand which features drive the most usage</li>
+                <li>Prioritize cost optimization efforts</li>
+            </ul>
+        </div>
+
+        <h4>Token Usage Table</h4>
+        <p>Detailed metrics for each flow/component of your AI Agent:</p>
+        <h4>Columns Explained:</h4>
+        <ul>
+            <li><strong>Flow Name</strong>: The specific component or conversation flow</li>
+            <li><strong>LLM Input/Output/Total</strong>: Token usage breakdown for that flow</li>
+            <li><strong>STT Tokens</strong>: Speech-to-text usage for that flow</li>
+            <li><strong>TTS Tokens</strong>: Text-to-speech usage for that flow</li>
+            <li><strong>Sessions</strong>: Number of conversations using that flow</li>
+            <li><strong>Total Turns</strong>: Number of interactions in that flow</li>
+            <li><strong>Avg Turns/Session</strong>: Average interactions per conversation</li>
+            <li><strong>Avg LLM/STT/TTS per Session</strong>: Average resource consumption per conversation</li>
+        </ul>
+        <div class="tip-box">
+            <p><strong>Use this to:</strong> Calculate per-flow costs, identify optimization opportunities, and understand resource distribution across your AI Agent.</p>
+        </div>
+
+        <h2>Cost Estimation Workflow</h2>
+
+        <h3>1. Gather Usage Data</h3>
+        <ul>
+            <li>Select a representative time period (e.g., one month)</li>
+            <li>Fetch and review the usage metrics</li>
+        </ul>
+
+        <h3>2. Calculate Base Costs</h3>
+        <ul>
+            <li><strong>LLM Costs</strong>: Total tokens × provider rate per token</li>
+            <li><strong>STT Costs</strong>: Total minutes × provider rate per minute</li>
+            <li><strong>TTS Costs</strong>: Total characters × provider rate per character</li>
+        </ul>
+
+        <h3>3. Project to Longer Periods</h3>
+        <ul>
+            <li><strong>Monthly Projection</strong>: Use a full month's data</li>
+            <li><strong>Annual Projection</strong>: Multiply monthly by 12 (adjust for seasonality if applicable)</li>
+            <li><strong>Growth Projection</strong>: Factor in expected usage growth</li>
+        </ul>
+
+        <h3>4. Compare Scenarios</h3>
+        <ul>
+            <li>Run reports for different time periods</li>
+            <li>Compare peak vs. average usage</li>
+            <li>Model different growth scenarios</li>
+        </ul>
+
+        <h2>Tips for Accurate Cost Estimation</h2>
+        <ol>
+            <li><strong>Use Representative Periods</strong>: Select time periods that reflect typical usage patterns</li>
+            <li><strong>Account for Growth</strong>: If usage is trending upward, factor that into projections</li>
+            <li><strong>Consider Seasonality</strong>: Some businesses have seasonal variations in usage</li>
+            <li><strong>Review Flow-Level Data</strong>: High-cost flows may need optimization before scaling</li>
+            <li><strong>Regular Monitoring</strong>: Run reports monthly to track trends and adjust projections</li>
+        </ol>
+
+        <h2>Interpreting the Results</h2>
+
+        <h3>High Usage Indicators</h3>
+        <ul>
+            <li><strong>High token counts</strong>: Complex conversations or large context windows</li>
+            <li><strong>High STT minutes</strong>: Voice-heavy interactions</li>
+            <li><strong>High TTS characters</strong>: Verbose responses or frequent voice output</li>
+        </ul>
+
+        <h3>Optimization Opportunities</h3>
+        <ul>
+            <li>Flows with high per-session averages may benefit from optimization</li>
+            <li>Compare average usage across flows to identify outliers</li>
+            <li>Review flows with high token-to-turn ratios (may indicate inefficiency)</li>
+        </ul>
+
+        <h2>Troubleshooting</h2>
+        
+        <h4>No data appears:</h4>
+        <ul>
+            <li>Verify your date range includes periods with actual usage</li>
+            <li>Ensure both From Date and To Date are selected</li>
+            <li>Check that the date range is valid (From Date before To Date)</li>
+        </ul>
+
+        <h4>Unexpectedly low or high numbers:</h4>
+        <ul>
+            <li>Verify the date range covers the intended period</li>
+            <li>Check for data gaps or incomplete periods</li>
+            <li>Compare with previous periods to identify anomalies</li>
+        </ul>
+
+        <h2>Next Steps</h2>
+        <ol>
+            <li><strong>Baseline Current Usage</strong>: Run a report for the most recent complete month</li>
+            <li><strong>Calculate Current Costs</strong>: Apply your provider rates to the usage metrics</li>
+            <li><strong>Project Future Costs</strong>: Extrapolate based on growth expectations</li>
+            <li><strong>Identify Optimization Targets</strong>: Review flow-level data for cost reduction opportunities</li>
+            <li><strong>Set Up Regular Reviews</strong>: Schedule monthly reviews to track trends</li>
+        </ol>
+
+        <div class="footer">
+            <p>For questions about interpreting the data or calculating costs, refer to your LLM, STT, and TTS provider documentation for current pricing rates and billing models.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "evals": [
+    {
+      "prompt": "Can you fill out this RFP for Ralph Lauren? /Users/Adam.Boyle/Downloads/Attachment 2_Ralph Lauren Contact Center Technology RFP.xlsx",
+      "shouldTrigger": true
+    },
+    {
+      "prompt": "We got a security questionnaire from a new prospect. Can you respond to it using our standard NiCE/Cognigy answers?",
+      "shouldTrigger": true
+    },
+    {
+      "prompt": "Can you review our SimpliSafe RFP response and improve the AI capabilities section?",
+      "shouldTrigger": true
+    },
+    {
+      "prompt": "Build a Cognigy demo package for Benesys focused on provider claims",
+      "shouldTrigger": false
+    },
+    {
+      "prompt": "What is the claim status tool doing in the BeneSys build script?",
+      "shouldTrigger": false
+    }
+  ]
+}

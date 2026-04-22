@@ -1,0 +1,2969 @@
+<!DOCTYPE html>
+<!--
+    Token Analyzer - Dashboard Version
+    Version: 2.0.0 Dashboard
+    Token Usage Analysis Dashboard - Fixed Configuration for Lovable Site
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="version" content="2.0.0-dashboard">
+    <meta name="supabase-project-id" content="ttvkjwlprfqtektginqh">
+    <title>Token Analyzer - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/dist/date-fns.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+            --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --card-border: rgba(148, 163, 184, 0.2);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-indigo: #6366f1;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.04) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(6, 182, 212, 0.03) 0px, transparent 50%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: var(--secondary-gradient);
+            border-radius: 2px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .getting-started-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: var(--secondary-gradient);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .getting-started-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .api-key-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+        }
+
+        .api-key-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .api-key-section p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 11px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 16px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: #ffffff;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+            background: #ffffff;
+        }
+
+        .api-key-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: #ffffff;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+            background: #ffffff;
+        }
+
+        .fetch-button {
+            background: var(--secondary-gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 32px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .fetch-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(79, 172, 254, 0.5);
+        }
+
+        .fetch-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .chart-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(79, 172, 254, 0.3);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+            overflow-x: auto;
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.04);
+            border-radius: 5px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 5px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+
+        .table-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: var(--secondary-gradient);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+
+        .export-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .export-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 14px;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.02);
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        tr:hover td {
+            background: rgba(0, 0, 0, 0.01);
+            color: var(--text-primary);
+        }
+
+        .loading {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 60px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            display: none;
+            border: 1px solid var(--card-border);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(79, 172, 254, 0.2);
+            border-top: 4px solid var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .api-status {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .api-status.success {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .api-status.error {
+            background: rgba(236, 72, 153, 0.2);
+            color: var(--accent-pink);
+            border: 1px solid var(--accent-pink);
+        }
+    </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Token Usage Analyzer</h1>
+            <p>View LLM, STT and TTS usage statistics for a given flow across different time periods.</p>
+            <a href="/token-analyzer-getting-started.html" class="getting-started-link">📖 Getting Started Guide</a>
+        </div>
+
+        <!-- Date Range Selection -->
+        <div class="api-key-section">
+            <h3>Date Range Selection</h3>
+            <p>Select the date range you want to analyze.</p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tokenFromDate">From Date</label>
+                    <input id="tokenFromDate" type="date" class="api-key-input">
+                </div>
+                <div class="form-group">
+                    <label for="tokenToDate">To Date</label>
+                    <input id="tokenToDate" type="date" class="api-key-input">
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; margin-bottom: 10px;">
+                <button class="fetch-button" id="fetchTokenDataBtn" onclick="fetchTokenData()">Fetch Token Data</button>
+            </div>
+            <div class="api-status" id="tokenApiStatus"></div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <h3>Processing Token Data</h3>
+            <p>Please wait while we analyze token usage</p>
+        </div>
+
+        <!-- Token Metrics -->
+        <div id="tokenMetrics" style="display: none;">
+            <!-- LLM Metrics Section -->
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px; font-weight: 600; border-bottom: 2px solid var(--accent-cyan); padding-bottom: 8px;">LLM Usage</h3>
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Total LLM Input Tokens</div>
+                        <div class="metric-value" id="totalLLMInputTokens">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total LLM Output Tokens</div>
+                        <div class="metric-value" id="totalLLMOutputTokens">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total LLM Tokens</div>
+                        <div class="metric-value" id="totalLLMTokens">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Average LLM Tokens/Session</div>
+                        <div class="metric-value" id="avgLLMTokens">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Avg LLM Tokens/Turn</div>
+                        <div class="metric-value" id="avgTokensPerTurn">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- STT/TTS Metrics Section -->
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px; font-weight: 600; border-bottom: 2px solid var(--accent-cyan); padding-bottom: 8px;">STT/TTS Usage</h3>
+                
+                <!-- Total STT/TTS -->
+                <div class="dashboard-grid" style="margin-bottom: 20px;">
+                    <div class="metric-card">
+                        <div class="metric-label" id="sttLabel">Total STT</div>
+                        <div class="metric-value" id="totalSTTTokens">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label" id="ttsLabel">Total TTS</div>
+                        <div class="metric-value" id="totalTTSTokens">-</div>
+                    </div>
+                </div>
+                
+                <!-- Provider-Specific Breakdown -->
+                <div style="margin-top: 15px;">
+                    <h4 style="margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; font-weight: 500;">By Provider:</h4>
+                    <div class="dashboard-grid">
+                        <div class="metric-card" id="deepgramSTTCard" style="display: none;">
+                            <div class="metric-label">Deepgram STT (minutes)</div>
+                            <div class="metric-value" id="deepgramSTTMinutes">-</div>
+                        </div>
+                        <div class="metric-card" id="deepgramTTSCard" style="display: none;">
+                            <div class="metric-label">Deepgram TTS (characters)</div>
+                            <div class="metric-value" id="deepgramTTSCharacters">-</div>
+                        </div>
+                        <div class="metric-card" id="elevenlabsTTSCard" style="display: none;">
+                            <div class="metric-label">ElevenLabs TTS (characters)</div>
+                            <div class="metric-value" id="elevenlabsTTSCharacters">-</div>
+                        </div>
+                        <div class="metric-card" id="azureSTTCard" style="display: none;">
+                            <div class="metric-label">Azure STT (hours)</div>
+                            <div class="metric-value" id="azureSTTHours">-</div>
+                        </div>
+                        <div class="metric-card" id="azureTTSCard" style="display: none;">
+                            <div class="metric-label">Azure TTS (characters)</div>
+                            <div class="metric-value" id="azureTTSCharacters">-</div>
+                        </div>
+                    </div>
+                    <h4 style="margin-top: 15px; margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; font-weight: 500;">Avg Per Session:</h4>
+                    <div class="dashboard-grid">
+                        <div class="metric-card" id="deepgramSTTAvgCard" style="display: none;">
+                            <div class="metric-label">Deepgram STT Avg/Session (min)</div>
+                            <div class="metric-value" id="deepgramSTTAvgValue">-</div>
+                        </div>
+                        <div class="metric-card" id="deepgramTTSAvgCard" style="display: none;">
+                            <div class="metric-label">Deepgram TTS Avg/Session (chars)</div>
+                            <div class="metric-value" id="deepgramTTSAvgValue">-</div>
+                        </div>
+                        <div class="metric-card" id="elevenlabsTTSAvgCard" style="display: none;">
+                            <div class="metric-label">ElevenLabs TTS Avg/Session (chars)</div>
+                            <div class="metric-value" id="elevenlabsTTSAvgValue">-</div>
+                        </div>
+                        <div class="metric-card" id="azureSTTAvgCard" style="display: none;">
+                            <div class="metric-label">Azure STT Avg/Session (hrs)</div>
+                            <div class="metric-value" id="azureSTTAvgValue">-</div>
+                        </div>
+                        <div class="metric-card" id="azureTTSAvgCard" style="display: none;">
+                            <div class="metric-label">Azure TTS Avg/Session (chars)</div>
+                            <div class="metric-value" id="azureTTSAvgValue">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Session & Turn Metrics Section -->
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px; font-weight: 600; border-bottom: 2px solid var(--accent-cyan); padding-bottom: 8px;">Session & Turn Metrics</h3>
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Sessions</div>
+                        <div class="metric-value" id="totalSessions">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Conversation Turns</div>
+                        <div class="metric-value" id="totalTurns">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Avg Turns/Session</div>
+                        <div class="metric-value" id="avgTurnsPerSession">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="billingNotes" style="margin-top: 12px; font-size: 13px; color: var(--text-secondary); line-height: 1.4;">
+                <!-- Filled dynamically with provider billing units -->
+            </div>
+
+            <!-- Token Usage by Flow Chart -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <div class="chart-title">Token Usage by Flow</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="tokenFlowChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Token Usage Over Time Chart -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <div class="chart-title">Token Usage Over Time</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="tokenTimeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Token Usage Table -->
+            <div class="table-container">
+                <div class="table-header-row">
+                    <h3 class="chart-title">Token Usage by Flow</h3>
+                    <button class="export-btn" onclick="exportTokenUsageTable()" title="Export to Excel">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Export to Excel
+                    </button>
+                </div>
+                <table id="tokenUsageTable">
+                    <thead>
+                        <tr>
+                            <th>Flow Name</th>
+                            <th>LLM Input</th>
+                            <th>LLM Output</th>
+                            <th>LLM Total</th>
+                            <th id="sttTokensHeader">STT Tokens</th>
+                            <th>TTS Tokens</th>
+                            <th>Total Tokens</th>
+                            <th>Sessions</th>
+                            <th>Total Turns</th>
+                            <th>Avg Turns/Session</th>
+                            <th>Avg LLM/Session</th>
+                            <th>Avg STT/Session</th>
+                            <th>Avg TTS/Session</th>
+                            <th>Tokens/Turn</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tokenUsageTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // AUTH TOKEN FROM PARENT
+        // ============================================
+        let _authToken = null;
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'AUTH_TOKEN' && e.data.token) {
+                _authToken = e.data.token;
+                console.log('[TokenAnalyzer] Auth token received from parent');
+            }
+        });
+        // Request token from parent on load
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'REQUEST_AUTH_TOKEN' }, '*');
+        }
+
+        // ============================================
+        // DASHBOARD CONFIGURATION
+        // ============================================
+        // Fixed configuration values for this dashboard instance
+        const DASHBOARD_CONFIG = {
+            // Cognigy OData API Configuration
+            ODATA_BASE_URL: 'https://odata-trial-us.cognigy.ai/v2.4',
+            // API key is now stored securely server-side and injected by the api-proxy edge function
+            PROJECT_ID: '682cc0e8f681ef9989541b86',
+            DATE_FIELD: 'timestamp',
+            
+            // STT/TTS Provider Configuration (always enabled)
+            ENABLE_DEEPGRAM_STT: true,
+            ENABLE_DEEPGRAM_TTS: false,
+            ENABLE_ELEVENLABS_TTS: true,
+            ENABLE_AZURE_STT: false,
+            ENABLE_AZURE_TTS: false
+        };
+        
+        let tokenData = null;
+        let tokenCharts = {};
+        
+        // Debug mode storage
+        let debugData = {
+            processedData: null,
+            logs: []
+        };
+        
+        // Debug logging function
+        function debugLog(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}${data ? '\n' + JSON.stringify(data, null, 2) : ''}`;
+            debugData.logs.push(logEntry);
+            updateDebugDisplay();
+            console.log('[DEBUG]', message, data || '');
+        }
+        
+        // Update debug panel display
+        function updateDebugDisplay() {
+            const debugPanel = document.getElementById('debugPanel');
+            if (!debugPanel) return;
+            
+            // Processed data summary
+            const processedEl = document.getElementById('debugProcessedData');
+            if (processedEl && tokenData) {
+                const summary = {
+                    totals: {
+                        llm: {
+                            input: tokenData.totals.inputTokens,
+                            output: tokenData.totals.outputTokens,
+                            total: tokenData.totals.totalTokens
+                        },
+                        stt: {
+                            total: tokenData.totals.stt,
+                            minutes: tokenData.totals.sttMinutes,
+                            providers: {
+                                deepgram: tokenData.totals.deepgramSTT,
+                                azure: tokenData.totals.azureSTT
+                            }
+                        },
+                        tts: {
+                            total: tokenData.totals.tts,
+                            characters: tokenData.totals.ttsCharacters,
+                            providers: {
+                                deepgram: tokenData.totals.deepgramTTS,
+                                elevenlabs: tokenData.totals.elevenlabsTTS,
+                                azure: tokenData.totals.azureTTS
+                            }
+                        },
+                        sessions: tokenData.totals.sessions,
+                        turns: tokenData.totals.totalTurns
+                    },
+                    flows: Object.keys(tokenData.flows).map(flowName => ({
+                        name: flowName,
+                        sessions: tokenData.flows[flowName].sessionCount,
+                        llmTokens: tokenData.flows[flowName].totalTokens,
+                        sttTokens: tokenData.flows[flowName].sttTokens,
+                        ttsTokens: tokenData.flows[flowName].ttsTokens
+                    }))
+                };
+                processedEl.textContent = JSON.stringify(summary, null, 2);
+            } else if (processedEl) {
+                processedEl.textContent = 'No data yet. Fetch token data to see processed results.';
+            }
+            
+            // Log display
+            const logEl = document.getElementById('debugLog');
+            if (logEl) {
+                logEl.textContent = debugData.logs.length > 0 
+                    ? debugData.logs.join('\n')
+                    : 'No logs yet.';
+            }
+        }
+        
+        // Copy all debug data to clipboard
+        function copyDebugData() {
+            const allData = {
+                timestamp: new Date().toISOString(),
+                processedData: tokenData ? {
+                    totals: tokenData.totals,
+                    flows: tokenData.flows
+                } : null,
+                logs: debugData.logs
+            };
+            
+            const jsonString = JSON.stringify(allData, null, 2);
+            navigator.clipboard.writeText(jsonString).then(() => {
+                alert('Debug data copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                // Fallback: show in prompt
+                prompt('Copy this debug data:', jsonString);
+            });
+        }
+        
+        // Clear debug data
+        function clearDebugData() {
+            debugData = {
+                processedData: null,
+                logs: []
+            };
+            updateDebugDisplay();
+        }
+        
+
+        // Resolve API base URL, allowing a local proxy for STT/TTS calls when running locally
+
+        // Fetch token data from OData and external APIs
+        async function fetchTokenData() {
+            const statusEl = document.getElementById('tokenApiStatus');
+            const loadingEl = document.getElementById('loading');
+            const metricsEl = document.getElementById('tokenMetrics');
+            
+            loadingEl.style.display = 'block';
+            metricsEl.style.display = 'none';
+            statusEl.textContent = 'Fetching token data...';
+            statusEl.className = 'api-status';
+
+            try {
+                // Fetch session/flow data from OData Conversations
+                // Use hardcoded configuration values (API key is server-side)
+                const baseUrl = DASHBOARD_CONFIG.ODATA_BASE_URL;
+                const projectId = DASHBOARD_CONFIG.PROJECT_ID;
+                const dateField = DASHBOARD_CONFIG.DATE_FIELD;
+                const fromDate = document.getElementById('tokenFromDate').value;
+                const toDate = document.getElementById('tokenToDate').value;
+
+                if (!fromDate || !toDate) {
+                    throw new Error('Please select both From Date and To Date');
+                }
+
+                // Build filter for Conversations and Analytics
+                let filter = `projectId eq '${projectId}'`;
+                if (fromDate && toDate) {
+                    const from = fromDate.substring(0, 10);
+                    const to = toDate.substring(0, 10);
+                    const fromDateObj = new Date(from + 'T00:00:00');
+                    fromDateObj.setDate(fromDateObj.getDate() - 2);
+                    const adjustedFrom = fromDateObj.toISOString().substring(0, 10);
+                    filter += ` and (${dateField} ge '${adjustedFrom}T00:00:00' and ${dateField} le '${to}T23:59:59')`;
+                }
+                
+                // Build headers with authentication
+                const headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                };
+
+                // Resolve the proxy base URL
+                const proxyBase = `https://ttvkjwlprfqtektginqh.supabase.co/functions/v1/api-proxy/odata`;
+
+                // Helper function to fetch OData via server-side proxy (API key injected there)
+                async function fetchWithAuth(entity, filter, orderby, top) {
+                    const headers = {
+                        'Content-Type': 'application/json',
+                    };
+                    if (_authToken) {
+                        headers['Authorization'] = 'Bearer ' + _authToken;
+                    }
+                    const response = await fetch(`${proxyBase}/${entity}`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({
+                            baseUrl: baseUrl,
+                            entity: entity,
+                            filter: filter,
+                            orderby: orderby,
+                            top: top
+                        })
+                    });
+                    return response;
+                }
+
+                // Build OData filter
+                const odataFilter = filter;
+                const odataOrderby = 'timestamp desc';
+                const odataTop = 10000;
+                
+                // Fetch both entities
+                statusEl.textContent = 'Fetching Conversations and Analytics data...';
+                const conversationsResponse = await fetchWithAuth('Conversations', odataFilter, odataOrderby, odataTop);
+                const analyticsResponse = await fetchWithAuth('Analytics', odataFilter, odataOrderby, odataTop);
+                
+                if (!conversationsResponse.ok) {
+                    let errorMessage = `Failed to fetch Conversations: ${conversationsResponse.status} ${conversationsResponse.statusText}`;
+                    try {
+                        const errorText = await conversationsResponse.text();
+                        if (errorText) {
+                            try {
+                                const errorJson = JSON.parse(errorText);
+                                if (errorJson.error && errorJson.error.message) {
+                                    errorMessage += ` - ${errorJson.error.message}`;
+                                } else {
+                                    errorMessage += ` - ${errorText.substring(0, 200)}`;
+                                }
+                            } catch (e) {
+                                errorMessage += ` - ${errorText.substring(0, 200)}`;
+                            }
+                        }
+                    } catch (e) {}
+                    throw new Error(errorMessage);
+                }
+                
+                if (!analyticsResponse.ok) {
+                    console.warn(`Analytics fetch returned ${analyticsResponse.status}. LLM tokens may not be available.`);
+                }
+                
+                const conversationsData = await conversationsResponse.json();
+                const conversations = Array.isArray(conversationsData) ? conversationsData : (conversationsData.value || []);
+                
+                let analytics = [];
+                if (analyticsResponse.ok) {
+                    const analyticsData = await analyticsResponse.json();
+                    analytics = Array.isArray(analyticsData) ? analyticsData : (analyticsData.value || []);
+                }
+                
+                // Store data in window for time chart processing
+                window.conversationsData = conversations;
+                window.analyticsData = analytics;
+                
+                // Save data to IndexedDB (for large datasets) and localStorage (fallback)
+                try {
+                    await saveToIndexedDB('standalone_conversationsData', conversations);
+                    if (analytics.length > 0) {
+                        await saveToIndexedDB('standalone_analyticsData', analytics);
+                    }
+                } catch (e) {
+                    console.warn('Could not save to IndexedDB, falling back to localStorage:', e);
+                    // Fallback to localStorage for smaller datasets
+                    try {
+                        localStorage.setItem('standalone_conversationsData', JSON.stringify(conversations));
+                        if (analytics.length > 0) {
+                            localStorage.setItem('standalone_analyticsData', JSON.stringify(analytics));
+                        }
+                    } catch (e2) {
+                        console.warn('Could not save to localStorage either:', e2);
+                    }
+                }
+
+                // Process session/flow data from Conversations, with LLM tokens from Analytics
+                try {
+                    tokenData = processSessionData(conversations, analytics, fromDate, toDate);
+                } catch (error) {
+                    console.error('Error in processSessionData:', error);
+                    throw new Error(`Failed to process session data: ${error.message}`);
+                }
+                
+                // Safety check: ensure tokenData is valid (but allow empty data - user might only have STT/TTS data)
+                if (!tokenData) {
+                    throw new Error('Failed to process session data. No conversations or analytics data found in the selected date range.');
+                }
+                
+                // Initialize totals if missing (shouldn't happen, but safety check)
+                if (!tokenData.totals) {
+                    console.warn('tokenData.totals is missing, initializing...');
+                    tokenData.totals = {
+                        inputTokens: 0,
+                        outputTokens: 0,
+                        totalTokens: 0,
+                        stt: 0,
+                        tts: 0,
+                        sttMinutes: 0,
+                        ttsCharacters: 0,
+                        deepgramSTT: { minutes: 0, tokens: 0 },
+                        deepgramTTS: { characters: 0, tokens: 0 },
+                        elevenlabsTTS: { characters: 0, tokens: 0 },
+                        azureSTT: { hours: 0, tokens: 0 },
+                        azureTTS: { characters: 0, tokens: 0 },
+                        sessions: 0,
+                        totalTurns: 0,
+                        avgTurnsPerSession: 0
+                    };
+                }
+                
+                // Merge Azure STT/TTS usage from Analytics custom fields
+                mergeAzureUsage(tokenData);
+                
+                // Process STT/TTS data from OData (Deepgram, ElevenLabs)
+                statusEl.textContent = 'Processing STT/TTS token data from OData...';
+                
+                // Process Deepgram usage from OData (custom6 for STT, transcripts for TTS)
+                const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+                const enableDeepgramTTS = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_TTS;
+                if (enableDeepgramSTT || enableDeepgramTTS) {
+                    mergeDeepgramUsage(tokenData, conversations);
+                }
+                
+                // Process ElevenLabs usage from OData (transcripts for TTS)
+                const enableElevenLabs = DASHBOARD_CONFIG.ENABLE_ELEVENLABS_TTS;
+                if (enableElevenLabs) {
+                    mergeElevenLabsUsage(tokenData, conversations);
+                }
+
+                // Check if we found LLM token data
+                const hasLLMTokens = tokenData.totals.totalTokens > 0;
+                const hasSTTTTS = tokenData.totals.stt > 0 || tokenData.totals.tts > 0;
+                
+                if (!hasLLMTokens && !hasSTTTTS) {
+                    statusEl.textContent = 'No token data found. For LLM tokens: Use Overwrite Analytics node to store tokenUsage in custom fields. For STT/TTS: Enable checkboxes and ensure data is stored in OData custom fields or transcripts.';
+                    statusEl.className = 'api-status';
+                } else {
+                    let msg = 'Token data fetched successfully!';
+                    if (!hasLLMTokens) {
+                        msg += ' Note: No LLM tokens found in custom fields. Use Overwrite Analytics node to store tokenUsage.';
+                    }
+                    if (!hasSTTTTS) {
+                        msg += ' Note: No STT/TTS data found.';
+                    }
+                    statusEl.textContent = msg;
+                    statusEl.className = 'api-status success';
+                }
+                
+                displayTokenMetrics();
+                debugLog('Token data processing complete', {
+                    totals: tokenData.totals,
+                    flowCount: Object.keys(tokenData.flows).length
+                });
+                updateDebugDisplay();
+
+            } catch (error) {
+                console.error('Error fetching token data:', error);
+                debugLog('Error occurred', { error: error.message, stack: error.stack });
+                statusEl.textContent = `Error: ${error.message}`;
+                statusEl.className = 'api-status error';
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // Merge Deepgram usage from OData into token data
+        // Deepgram STT: already processed from Analytics custom6 field in processSessionData
+        // Deepgram TTS: calculates from Conversations OData transcripts
+        function mergeDeepgramUsage(tokenData, conversations) {
+            if (!tokenData || !tokenData.totals) {
+                console.error('mergeDeepgramUsage: tokenData or tokenData.totals is undefined');
+                return;
+            }
+            
+            const enableDeepgramTTS = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_TTS;
+            
+            // Initialize provider-specific totals if they don't exist
+            if (!tokenData.totals.deepgramTTS) tokenData.totals.deepgramTTS = { characters: 0, tokens: 0 };
+            
+            // Calculate Deepgram TTS from transcripts (only if enabled)
+            if (enableDeepgramTTS && conversations && conversations.length > 0) {
+                debugLog('Calculating Deepgram TTS characters from Conversations transcripts');
+                
+                const flowTTSChars = new Map(); // flowName -> character count
+                let transcriptsFound = 0;
+                let sampleTTSOutputLogs = [];
+                
+                conversations.forEach(conv => {
+                    const flowName = conv.flowName || 'Unknown';
+                    const type = conv.type || conv.source || '';
+                    
+                    // Filter for bot/AI responses (TTS output)
+                    const isUserMessage = type && (
+                        type.toLowerCase() === 'user' || 
+                        type.toLowerCase().includes('user') ||
+                        (conv.source && (conv.source.toLowerCase() === 'user' || conv.source.toLowerCase().includes('user')))
+                    );
+                    
+                    // Skip user messages - we only want AI/bot responses for TTS
+                    if (isUserMessage) {
+                        return;
+                    }
+                    
+                    // For AI/bot responses, look for the TTS output text
+                    // Priority: 1) outputText field, 2) inputData nested fields
+                    let aiOutputText = null;
+                    let fieldUsed = null;
+                    
+                    // First, check for outputText field directly on the record (most reliable for TTS output)
+                    if (conv.outputText && typeof conv.outputText === 'string' && conv.outputText.trim().length > 0) {
+                        aiOutputText = conv.outputText.trim();
+                        fieldUsed = 'outputText';
+                    }
+                    
+                    // Second, check inputData which might contain the AI's response
+                    if (!aiOutputText && conv.inputData) {
+                        let inputData = null;
+                        try {
+                            inputData = typeof conv.inputData === 'string' 
+                                ? JSON.parse(conv.inputData) 
+                                : conv.inputData;
+                        } catch (e) {
+                            // Not JSON, skip
+                        }
+                        
+                        if (inputData && typeof inputData === 'object') {
+                            // Check common paths for AI output text in inputData
+                            const possiblePaths = [
+                                'outputText', 'output.text', 'outputText.text',
+                                'text', 'message', 'response', 'response.text', 'response.message',
+                                'aiResponse', 'aiResponse.text', 'aiResponse.message',
+                                'agentResponse', 'agentResponse.text', 'agentResponse.message',
+                                'botResponse', 'botResponse.text', 'botResponse.message',
+                                'ttsOutput', 'tts.output', 'ttsOutput.text',
+                                'output', 'output.message', 'output.content',
+                                'data.text', 'data.message', 'data.output',
+                                'payload.text', 'payload.message'
+                            ];
+                            
+                            for (const path of possiblePaths) {
+                                const parts = path.split('.');
+                                let value = inputData;
+                                for (const part of parts) {
+                                    if (value && typeof value === 'object' && part in value) {
+                                        value = value[part];
+                } else {
+                                        value = null;
+                                        break;
+                                    }
+                                }
+                                if (value && typeof value === 'string' && value.trim().length > 0) {
+                                    aiOutputText = value.trim();
+                                    fieldUsed = `inputData.${path}`;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Count characters from AI output text (including all spaces for accurate billing)
+                    if (aiOutputText && aiOutputText.length > 0) {
+                        const charCount = aiOutputText.length; // Includes all spaces
+                        if (!flowTTSChars.has(flowName)) {
+                            flowTTSChars.set(flowName, 0);
+                        }
+                        flowTTSChars.set(flowName, flowTTSChars.get(flowName) + charCount);
+                        transcriptsFound++;
+                        // Log the first few successful extractions
+                        if (sampleTTSOutputLogs.length < 3) {
+                            sampleTTSOutputLogs.push({
+                                flowName: flowName,
+                                fieldUsed: fieldUsed,
+                                textPreview: aiOutputText.substring(0, 50) + (aiOutputText.length > 50 ? '...' : ''),
+                                charCount: charCount,
+                                recordType: conv.type,
+                                recordSource: conv.source
+                            });
+                        }
+                    }
+                });
+                
+                debugLog('Deepgram TTS transcript extraction summary', {
+                    transcriptsFound,
+                    totalConversations: conversations.length,
+                    sampleTTSOutputLogs: sampleTTSOutputLogs
+                });
+                
+                // Calculate total characters found in transcripts
+                let totalTranscriptChars = 0;
+                flowTTSChars.forEach((chars) => {
+                    totalTranscriptChars += chars;
+                });
+                
+                // Use transcript characters directly (no API scaling)
+                if (totalTranscriptChars > 0) {
+                    flowTTSChars.forEach((transcriptChars, flowName) => {
+                        if (tokenData.flows[flowName]) {
+                            tokenData.flows[flowName].ttsTokens += transcriptChars;
+                            debugLog(`Assigned ${transcriptChars} Deepgram TTS chars to flow ${flowName} (from transcripts)`);
+                        }
+                    });
+                    
+                    // Update totals from transcripts
+                    tokenData.totals.deepgramTTS.characters += totalTranscriptChars;
+                    tokenData.totals.deepgramTTS.tokens += totalTranscriptChars;
+                    tokenData.totals.ttsCharacters += totalTranscriptChars;
+                } else {
+                    debugLog('No Deepgram TTS transcripts found in conversations');
+                }
+            }
+            
+            // Recalculate totals
+            tokenData.totals.tts = 0;
+            Object.keys(tokenData.flows).forEach(flowName => {
+                tokenData.totals.tts += tokenData.flows[flowName].ttsTokens;
+            });
+        }
+
+        // Merge ElevenLabs usage from OData into token data
+        // ElevenLabs TTS: calculates from Conversations OData transcripts
+        function mergeElevenLabsUsage(tokenData, conversations) {
+            if (!tokenData || !tokenData.totals) {
+                console.error('mergeElevenLabsUsage: tokenData or tokenData.totals is undefined');
+                return;
+            }
+            
+            // Initialize provider-specific totals if they don't exist
+            if (!tokenData.totals.elevenlabsTTS) tokenData.totals.elevenlabsTTS = { characters: 0, tokens: 0 };
+            
+            // Use Conversations OData transcripts to calculate TTS character counts per flow
+            if (conversations && conversations.length > 0) {
+                debugLog('Calculating ElevenLabs TTS characters from Conversations transcripts', {
+                    totalConversations: conversations.length
+                });
+                
+                // Map to track character counts per flow from transcripts
+                const flowTTSChars = new Map(); // flowName -> character count
+                let transcriptsFound = 0;
+                let transcriptsNotFound = 0;
+                let sampleTTSOutputLogs = [];
+                let sampleBotRecords = []; // For debugging
+                
+                // First, sample some records to understand the structure
+                const sampleSize = Math.min(20, conversations.length);
+                const botRecords = conversations.filter(conv => {
+                    const type = (conv.type || '').toLowerCase();
+                    const source = (conv.source || '').toLowerCase();
+                    // Bot output: type='output' OR source='bot' OR not user
+                    const isBotOutput = type === 'output' || source === 'bot' || 
+                        !(type === 'user' || type.includes('user') || source === 'user' || source.includes('user'));
+                    return isBotOutput;
+                }).slice(0, sampleSize);
+                
+                botRecords.forEach(conv => {
+                    sampleBotRecords.push({
+                        type: conv.type,
+                        source: conv.source,
+                        hasOutputText: !!conv.outputText,
+                        outputTextPreview: conv.outputText ? String(conv.outputText).substring(0, 50) : null,
+                        hasInputText: !!conv.inputText,
+                        inputTextPreview: conv.inputText ? String(conv.inputText).substring(0, 50) : null,
+                        hasInputData: !!conv.inputData,
+                        flowName: conv.flowName
+                    });
+                });
+                
+                debugLog('Sample bot output records analysis', {
+                    totalConversations: conversations.length,
+                    botRecordsSampled: sampleBotRecords.length,
+                    samples: sampleBotRecords
+                });
+                
+                conversations.forEach(conv => {
+                    const flowName = conv.flowName || 'Unknown';
+                    const type = (conv.type || '').toLowerCase();
+                    const source = (conv.source || '').toLowerCase();
+                    
+                    // Filter for bot/AI responses (TTS output)
+                    // In Cognigy Conversations OData:
+                    // - type: specifies "input" or "output"
+                    // - source: specifies "user" or "bot"
+                    // We want records where type='output' OR source='bot' OR not explicitly user
+                    const isBotOutput = type === 'output' || source === 'bot' || 
+                        !(type === 'user' || type.includes('user') || source === 'user' || source.includes('user'));
+                    
+                    // Skip non-bot records - we only want bot output for TTS
+                    if (!isBotOutput) {
+                        transcriptsNotFound++;
+                        return;
+                    }
+                    
+                    // For AI/bot responses, look for the TTS output text
+                    // Priority: 1) outputText field, 2) inputText field (for bot output records), 3) inputData nested fields
+                    let aiOutputText = null;
+                    let fieldUsed = null;
+                    
+                    // First, check for outputText field directly on the record
+                    if (conv.outputText && typeof conv.outputText === 'string' && conv.outputText.trim().length > 0) {
+                        aiOutputText = conv.outputText; // Keep original (not trimmed) to count all spaces
+                        fieldUsed = 'outputText';
+                    }
+                    
+                    // Second, check inputText field (for bot output records, inputText contains the bot's TTS output)
+                    // This is a known Cognigy OData pattern - inputText contains text for both user input AND bot output
+                    if (!aiOutputText && conv.inputText && typeof conv.inputText === 'string' && conv.inputText.trim().length > 0) {
+                        aiOutputText = conv.inputText; // Keep original (not trimmed) to count all spaces
+                        fieldUsed = 'inputText (bot output)';
+                    }
+                    
+                    // Third, check inputData which might contain the AI's response
+                    if (!aiOutputText && conv.inputData) {
+                        let inputData = null;
+                        try {
+                            inputData = typeof conv.inputData === 'string' 
+                                ? JSON.parse(conv.inputData) 
+                                : conv.inputData;
+                        } catch (e) {
+                            // Not JSON, skip
+                        }
+                        
+                        if (inputData && typeof inputData === 'object') {
+                            // Check common paths for AI output text in inputData
+                            const possiblePaths = [
+                                'outputText', 'output.text', 'outputText.text',
+                                'text', 'message', 'response', 'response.text', 'response.message',
+                                'aiResponse', 'aiResponse.text', 'aiResponse.message',
+                                'agentResponse', 'agentResponse.text', 'agentResponse.message',
+                                'botResponse', 'botResponse.text', 'botResponse.message',
+                                'ttsOutput', 'tts.output', 'ttsOutput.text',
+                                'output', 'output.message', 'output.content',
+                                'data.text', 'data.message', 'data.output',
+                                'payload.text', 'payload.message'
+                            ];
+                            
+                            for (const path of possiblePaths) {
+                                const parts = path.split('.');
+                                let value = inputData;
+                                for (const part of parts) {
+                                    if (value && typeof value === 'object' && part in value) {
+                                        value = value[part];
+                                    } else {
+                                        value = null;
+                                        break;
+                                    }
+                                }
+                                if (value && typeof value === 'string' && value.trim().length > 0) {
+                                    aiOutputText = value; // Keep original (not trimmed) to count all spaces
+                                    fieldUsed = `inputData.${path}`;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Count characters from AI output text (including all spaces for accurate billing)
+                    if (aiOutputText && aiOutputText.length > 0) {
+                        const charCount = aiOutputText.length; // Includes all spaces
+                        if (!flowTTSChars.has(flowName)) {
+                            flowTTSChars.set(flowName, 0);
+                        }
+                        flowTTSChars.set(flowName, flowTTSChars.get(flowName) + charCount);
+                        transcriptsFound++;
+                        // Log the first few successful extractions
+                        if (sampleTTSOutputLogs.length < 3) {
+                            sampleTTSOutputLogs.push({
+                                flowName: flowName,
+                                fieldUsed: fieldUsed,
+                                textPreview: aiOutputText.substring(0, 50) + (aiOutputText.length > 50 ? '...' : ''),
+                                charCount: charCount,
+                                recordType: conv.type,
+                                recordSource: conv.source
+                            });
+                        }
+                    } else {
+                        transcriptsNotFound++;
+                    }
+                });
+                
+                debugLog('ElevenLabs transcript extraction summary', {
+                    transcriptsFound,
+                    transcriptsNotFound,
+                    totalConversations: conversations.length,
+                    sampleTTSOutputLogs: sampleTTSOutputLogs
+                });
+                
+                // Calculate total characters found in transcripts
+                let totalTranscriptChars = 0;
+                flowTTSChars.forEach((chars) => {
+                    totalTranscriptChars += chars;
+                });
+                
+                // Use transcript characters directly (no API scaling)
+                if (totalTranscriptChars > 0) {
+                    flowTTSChars.forEach((transcriptChars, flowName) => {
+                        if (tokenData.flows[flowName]) {
+                            tokenData.flows[flowName].ttsTokens += transcriptChars;
+                            debugLog(`Assigned ${transcriptChars} ElevenLabs TTS chars to flow ${flowName} (from transcripts)`);
+                        }
+                    });
+                    
+                    // Update totals from transcripts
+                    tokenData.totals.elevenlabsTTS.characters += totalTranscriptChars;
+                    tokenData.totals.elevenlabsTTS.tokens += totalTranscriptChars;
+                    tokenData.totals.ttsCharacters += totalTranscriptChars;
+                } else {
+                    debugLog('No ElevenLabs TTS transcripts found in conversations');
+                }
+            }
+            
+            // Recalculate totals
+            tokenData.totals.tts = 0;
+            Object.keys(tokenData.flows).forEach(flowName => {
+                tokenData.totals.tts += tokenData.flows[flowName].ttsTokens;
+            });
+        }
+
+        // Merge Azure usage from Analytics custom fields into token data
+        function mergeAzureUsage(tokenData) {
+            if (!tokenData || !tokenData.totals) {
+                console.error('mergeAzureUsage: tokenData or tokenData.totals is undefined');
+                return;
+            }
+            
+            let totalAzureSTTHours = 0;
+            let totalAzureTTSChars = 0;
+            let totalDeepgramSTTMinutes = 0;
+            
+            // Check if Azure or Deepgram processing is enabled
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+            const enableAzureTTS = DASHBOARD_CONFIG.ENABLE_AZURE_TTS;
+            const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+            
+            if (!enableAzureSTT && !enableAzureTTS && !enableDeepgramSTT) {
+                // All processing disabled, skip
+                return;
+            }
+            
+            // Initialize provider-specific totals if they don't exist
+            if (!tokenData.totals.azureSTT) tokenData.totals.azureSTT = { hours: 0, tokens: 0 };
+            if (!tokenData.totals.azureTTS) tokenData.totals.azureTTS = { characters: 0, tokens: 0 };
+            if (!tokenData.totals.deepgramSTT) tokenData.totals.deepgramSTT = { minutes: 0, tokens: 0 };
+            
+            // Aggregate Azure and Deepgram usage from flow data (already processed from Analytics)
+            if (tokenData.flows) {
+                Object.keys(tokenData.flows).forEach(flowName => {
+                    const flow = tokenData.flows[flowName];
+                    if (enableAzureSTT) {
+                        totalAzureSTTHours += flow.azureSTTHours || 0;
+                    }
+                    if (enableAzureTTS) {
+                        totalAzureTTSChars += flow.azureTTSCharacters || 0;
+                    }
+                    if (enableDeepgramSTT) {
+                        const flowDeepgramMinutes = flow.deepgramSTTMinutes || 0;
+                        totalDeepgramSTTMinutes += flowDeepgramMinutes;
+                        if (flowDeepgramMinutes > 0) {
+                            debugLog('Aggregating Deepgram STT minutes from flow', {
+                                flowName: flowName,
+                                flowDeepgramSTTMinutes: flowDeepgramMinutes,
+                                runningTotal: totalDeepgramSTTMinutes
+                            });
+                        }
+                    }
+                });
+            }
+            
+            debugLog('Pre-aggregation totals', {
+                totalAzureSTTHours: totalAzureSTTHours,
+                totalAzureTTSChars: totalAzureTTSChars,
+                totalDeepgramSTTMinutes: totalDeepgramSTTMinutes,
+                enableDeepgramSTT: enableDeepgramSTT
+            });
+            
+            // Update provider-specific totals (only if enabled)
+            if (enableAzureSTT) {
+                tokenData.totals.azureSTT.hours = totalAzureSTTHours;
+                // Convert Azure STT hours to tokens (heuristic: similar to Deepgram)
+                tokenData.totals.azureSTT.tokens = Math.round(totalAzureSTTHours * 100000 * 0.6);
+                // Update aggregate totals - convert Azure STT hours to minutes
+                tokenData.totals.sttMinutes += Math.round(totalAzureSTTHours * 60);
+                
+                // Distribute Azure STT tokens only to flows with Azure STT data
+                const flowsWithAzureSTT = Object.keys(tokenData.flows).filter(flowName => {
+                    return (tokenData.flows[flowName].azureSTTHours || 0) > 0;
+                });
+                
+                if (flowsWithAzureSTT.length > 0) {
+                    const totalAzureSTTSessions = flowsWithAzureSTT.reduce((sum, flowName) => {
+                        return sum + (tokenData.flows[flowName].sessionCount || 0);
+                    }, 0);
+                    
+                    if (totalAzureSTTSessions > 0) {
+                        const azureSTTTokens = tokenData.totals.azureSTT.tokens;
+                        flowsWithAzureSTT.forEach(flowName => {
+                            const flow = tokenData.flows[flowName];
+                            const flowSessionRatio = flow.sessionCount / totalAzureSTTSessions;
+                            flow.sttTokens += Math.round(azureSTTTokens * flowSessionRatio);
+                        });
+                    }
+                }
+            }
+            
+            if (enableAzureTTS) {
+                tokenData.totals.azureTTS.characters = totalAzureTTSChars;
+                tokenData.totals.azureTTS.tokens = totalAzureTTSChars; // Characters = tokens for billing
+                // Update aggregate totals
+                tokenData.totals.ttsCharacters += totalAzureTTSChars;
+                
+                // Distribute Azure TTS characters only to flows with Azure TTS data
+                const flowsWithAzureTTS = Object.keys(tokenData.flows).filter(flowName => {
+                    return (tokenData.flows[flowName].azureTTSCharacters || 0) > 0;
+                });
+                
+                flowsWithAzureTTS.forEach(flowName => {
+                    const flow = tokenData.flows[flowName];
+                    flow.ttsTokens += (flow.azureTTSCharacters || 0);
+                });
+            }
+            
+            // Recalculate aggregate STT/TTS totals
+            tokenData.totals.stt = 0;
+            tokenData.totals.tts = 0;
+            Object.keys(tokenData.flows).forEach(flowName => {
+                tokenData.totals.stt += tokenData.flows[flowName].sttTokens;
+                tokenData.totals.tts += tokenData.flows[flowName].ttsTokens;
+            });
+            
+            // Update Deepgram STT totals from custom6 (if enabled)
+            if (enableDeepgramSTT) {
+                debugLog('Updating Deepgram STT totals', {
+                    totalDeepgramSTTMinutes: totalDeepgramSTTMinutes,
+                    currentTotalsMinutes: tokenData.totals.deepgramSTT.minutes
+                });
+                // Add Deepgram STT minutes from custom6 to existing totals (from API if available)
+                // Don't round - preserve decimal precision for accurate billing
+                tokenData.totals.deepgramSTT.minutes += totalDeepgramSTTMinutes;
+                // Convert Deepgram STT minutes to tokens (heuristic: similar to Azure)
+                const deepgramSTTHours = totalDeepgramSTTMinutes / 60;
+                const totalTokensFromMinutes = deepgramSTTHours > 0 ? Math.round(deepgramSTTHours * 100000) : 0;
+                const totalSTTTokens = Math.round(totalTokensFromMinutes * 0.6);
+                tokenData.totals.deepgramSTT.tokens += totalSTTTokens;
+                // Update aggregate totals - preserve decimal precision
+                tokenData.totals.sttMinutes += totalDeepgramSTTMinutes;
+                
+                // Distribute Deepgram STT tokens to flows with Deepgram STT data
+                const flowsWithDeepgramSTT = Object.keys(tokenData.flows).filter(flowName => {
+                    return (tokenData.flows[flowName].deepgramSTTMinutes || 0) > 0;
+                });
+                
+                if (flowsWithDeepgramSTT.length > 0) {
+                    const totalDeepgramSTTSessions = flowsWithDeepgramSTT.reduce((sum, flowName) => {
+                        return sum + (tokenData.flows[flowName].sessionCount || 0);
+                    }, 0);
+                    
+                    if (totalDeepgramSTTSessions > 0) {
+                        flowsWithDeepgramSTT.forEach(flowName => {
+                            const flow = tokenData.flows[flowName];
+                            const flowSessionRatio = flow.sessionCount / totalDeepgramSTTSessions;
+                            flow.sttTokens += Math.round(totalSTTTokens * flowSessionRatio);
+                        });
+                    }
+                }
+            }
+            
+            debugLog('Merged Azure and Deepgram usage from Analytics', {
+                azureSTTHours: totalAzureSTTHours,
+                azureTTSChars: totalAzureTTSChars,
+                deepgramSTTMinutes: totalDeepgramSTTMinutes
+            });
+        }
+
+        // Process session/flow data from Conversations (for session/flow mapping)
+        // LLM tokens are read from custom fields in Analytics (not Conversations)
+        // IMPORTANT: Only process the last few turns per session since tokens are cumulative
+        // Data is already sorted by timestamp desc (newest first) from OData query
+        function processSessionData(conversations, analytics = [], fromDate = null, toDate = null) {
+            // Safety check: ensure conversations is an array
+            if (!conversations || !Array.isArray(conversations)) {
+                conversations = [];
+            }
+            if (!analytics || !Array.isArray(analytics)) {
+                analytics = [];
+            }
+            
+            const flowTokenData = {};
+            const allSessions = new Set();
+            const sessionToFlows = new Map();
+            
+            const sessionTurns = new Map();
+            const sessionFlowTokenSums = new Map();
+            const analyticsSessions = new Set(); // Track sessions from analytics records with token data
+            
+            // Process ALL records in the date range for accurate analysis
+            // For LLM tokens: we SUM all values per session since each record represents token usage for that turn
+            // For Azure STT/TTS: we SUM all per-turn values, so we need ALL records in the date range
+            // No limits - this analyzer is designed to handle large datasets (30-90+ days)
+
+            conversations.forEach(conv => {
+                const flowName = conv.flowName || 'Unknown';
+                const sessionId = conv.sessionId;
+                
+                if (sessionId) {
+                    if (!sessionTurns.has(sessionId)) {
+                        sessionTurns.set(sessionId, 0);
+                    }
+                    sessionTurns.set(sessionId, sessionTurns.get(sessionId) + 1);
+                }
+                
+                if (sessionId) {
+                    allSessions.add(sessionId);
+                    if (!sessionToFlows.has(sessionId)) {
+                        sessionToFlows.set(sessionId, new Set());
+                    }
+                    sessionToFlows.get(sessionId).add(flowName);
+                }
+
+                if (!flowTokenData[flowName]) {
+                    flowTokenData[flowName] = {
+                        flowName: flowName,
+                        sessions: new Set(),
+                        inputTokens: 0,
+                        outputTokens: 0,
+                        totalTokens: 0,
+                        sttTokens: 0,
+                        ttsTokens: 0,
+                        azureSTTHours: 0,
+                        azureTTSCharacters: 0,
+                        deepgramSTTMinutes: 0,
+                        totalTurns: 0
+                    };
+                }
+
+                if (sessionId) {
+                    flowTokenData[flowName].sessions.add(sessionId);
+                }
+            });
+            
+            if (analytics.length > 0) {
+                debugLog(`Processing ${analytics.length} Analytics records (all records in date range - no limits)`);
+                
+                // Debug: Count records with custom6 data (field name is exactly "custom6")
+                const recordsWithCustom6 = analytics.filter(r => {
+                    return r.custom6 !== null && r.custom6 !== undefined && r.custom6 !== '' && String(r.custom6).trim().length > 0;
+                });
+                debugLog(`Found ${recordsWithCustom6.length} Analytics records with custom6 data`, {
+                    totalAnalytics: analytics.length,
+                    recordsWithCustom6: recordsWithCustom6.length,
+                    percentage: analytics.length > 0 ? ((recordsWithCustom6.length / analytics.length) * 100).toFixed(1) + '%' : '0%'
+                });
+                if (recordsWithCustom6.length > 0) {
+                    const sampleCustom6 = recordsWithCustom6.slice(0, 10).map(r => ({
+                        custom6: String(r.custom6).trim(),
+                        custom6Type: typeof r.custom6,
+                        custom6Value: r.custom6,
+                        sessionId: r.sessionId,
+                        flowName: r.flowName,
+                        timestamp: r.timestamp
+                    }));
+                    debugLog('Sample custom6 values from Analytics records', {
+                        samples: sampleCustom6,
+                        totalWithCustom6: recordsWithCustom6.length
+                    });
+                } else {
+                    // Check what fields are actually available in Analytics records
+                    const sampleRecord = analytics[0];
+                    const availableFields = Object.keys(sampleRecord || {}).filter(k => k.toLowerCase().includes('custom'));
+                    const custom6Status = analytics.map(r => ({
+                        hasCustom6: r.custom6 !== null && r.custom6 !== undefined && r.custom6 !== '',
+                        custom6Value: r.custom6,
+                        custom6Type: typeof r.custom6
+                    })).slice(0, 10);
+                    debugLog('No custom6 data found - diagnostic information', {
+                        totalRecords: analytics.length,
+                        sampleRecordFields: Object.keys(sampleRecord || {}).slice(0, 30),
+                        customFieldsFound: availableFields,
+                        custom6StatusSample: custom6Status,
+                        sampleRecordCustom6: sampleRecord ? {
+                            custom6: sampleRecord.custom6,
+                            custom6Type: typeof sampleRecord.custom6,
+                            custom6IsNull: sampleRecord.custom6 === null,
+                            custom6IsUndefined: sampleRecord.custom6 === undefined,
+                            custom6IsEmpty: sampleRecord.custom6 === ''
+                        } : null
+                    });
+                }
+            } else {
+                debugLog('No Analytics records found! Make sure to fetch Analytics data when fetching from OData.');
+            }
+            
+            let matchedCount = 0;
+            let unmatchedCount = 0;
+            let skippedCount = 0;
+            
+            // Process Azure STT/TTS usage from Analytics custom fields (custom4 = Azure STT hours, custom5 = Azure TTS characters)
+            // Process Deepgram STT usage from Analytics custom field (custom6 = Deepgram STT duration in seconds)
+            // Only process if providers are enabled in configuration
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+            const enableAzureTTS = DASHBOARD_CONFIG.ENABLE_AZURE_TTS;
+            const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+            const enableDeepgramTTS = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_TTS;
+            
+            debugLog('STT/TTS provider configuration', {
+                enableAzureSTT: enableAzureSTT,
+                enableAzureTTS: enableAzureTTS,
+                enableDeepgramSTT: enableDeepgramSTT,
+                enableDeepgramTTS: enableDeepgramTTS
+            });
+            
+            const sessionFlowAzureUsage = new Map(); // "sessionId|flowName" -> { sttHours, ttsChars }
+            const sessionFlowDeepgramSTTUsage = new Map(); // "sessionId|flowName" -> { sttMinutes }
+            
+            // Process analytics records (already sorted by timestamp desc from OData)
+            // Only process the last few records per session+flow combination
+            // Process both LLM tokens and Azure data in the same loop for efficiency and consistent limits
+            analytics.forEach((analyticsRecord, index) => {
+                const sessionId = analyticsRecord.sessionId || analyticsRecord.session_id || analyticsRecord.sessionID;
+                const flowName = analyticsRecord.flowName || analyticsRecord.flow_name || analyticsRecord.flowName || 'Unknown';
+                const timestamp = analyticsRecord.timestamp || analyticsRecord.date || analyticsRecord.time || new Date().toISOString();
+                
+                // Additional safety check: filter by date range if provided
+                // (OData query should already filter, but this ensures we only process records in range)
+                if (fromDate && toDate) {
+                    const recordDate = new Date(timestamp);
+                    const from = new Date(fromDate);
+                    const to = new Date(toDate);
+                    // Set to start of day for 'from' date to include the full day
+                    from.setHours(0, 0, 0, 0);
+                    // Set to end of day for 'to' date to include the full day
+                    to.setHours(23, 59, 59, 999);
+                    
+                    if (isNaN(recordDate.getTime()) || recordDate < from || recordDate > to) {
+                        // Record is outside the selected date range, skip it
+                        skippedCount++;
+                        return;
+                    }
+                }
+                
+                let inputTokens = 0;
+                let outputTokens = 0;
+                let totalTokens = 0;
+                
+                if (analyticsRecord.custom1) {
+                    const parsed = parseFloat(analyticsRecord.custom1);
+                    if (!isNaN(parsed)) inputTokens = parsed;
+                }
+                if (analyticsRecord.custom2) {
+                    const parsed = parseFloat(analyticsRecord.custom2);
+                    if (!isNaN(parsed)) outputTokens = parsed;
+                }
+                if (analyticsRecord.custom3) {
+                    const parsed = parseFloat(analyticsRecord.custom3);
+                    if (!isNaN(parsed)) totalTokens = parsed;
+                }
+                
+                if (!inputTokens && !outputTokens && !totalTokens) {
+                    const customFields = [analyticsRecord.custom1, analyticsRecord.custom2, analyticsRecord.custom3, analyticsRecord.custom4, analyticsRecord.custom5];
+                    for (const field of customFields) {
+                        if (field) {
+                            try {
+                                const parsed = JSON.parse(field);
+                                if (parsed.inputTokens !== undefined) inputTokens = parsed.inputTokens;
+                                if (parsed.outputTokens !== undefined) outputTokens = parsed.outputTokens;
+                                if (parsed.totalTokens !== undefined) totalTokens = parsed.totalTokens;
+                                if (inputTokens || outputTokens || totalTokens) break;
+                            } catch (e) {
+                                // Not JSON, continue
+                            }
+                        }
+                    }
+                }
+                
+                // Read Deepgram STT duration from custom6 (only if Deepgram STT is enabled)
+                // Deepgram STT duration is stored in seconds (from {{input.data.payload.speech.vendor.evt.duration}})
+                // Convert seconds to minutes for billing (Deepgram STT bills by minutes)
+                // Field name is exactly "custom6" (no variations)
+                // Read it the same way as LLM tokens (custom1, custom2, custom3) - directly and simply
+                let deepgramSTTMinutes = 0;
+                if (enableDeepgramSTT && analyticsRecord.custom6 !== null && analyticsRecord.custom6 !== undefined && analyticsRecord.custom6 !== '') {
+                    const custom6Str = String(analyticsRecord.custom6).trim();
+                    if (custom6Str.length > 0) {
+                        const parsed = parseFloat(custom6Str);
+                        if (!isNaN(parsed) && parsed > 0) {
+                            // Deepgram STT duration is in seconds
+                            // Convert to minutes: seconds / 60
+                            deepgramSTTMinutes = parsed / 60;
+                            debugLog('Deepgram STT duration found in custom6', {
+                                custom6: custom6Str,
+                                custom6Raw: analyticsRecord.custom6,
+                                custom6Type: typeof analyticsRecord.custom6,
+                                seconds: parsed,
+                                convertedMinutes: deepgramSTTMinutes,
+                                record: {
+                                    id: analyticsRecord.id,
+                                    sessionId: analyticsRecord.sessionId,
+                                    flowName: analyticsRecord.flowName,
+                                    timestamp: analyticsRecord.timestamp
+                                }
+                            });
+                        } else {
+                            // Log when custom6 is present but not parseable
+                            debugLog('Deepgram STT custom6 ignored (not a valid number)', {
+                                custom6: custom6Str,
+                                custom6Raw: analyticsRecord.custom6,
+                                custom6Type: typeof analyticsRecord.custom6,
+                                parsed: parsed,
+                                record: {
+                                    id: analyticsRecord.id,
+                                    sessionId: analyticsRecord.sessionId,
+                                    flowName: analyticsRecord.flowName,
+                                    timestamp: analyticsRecord.timestamp
+                                }
+                            });
+                        }
+                    }
+                }
+                
+                // Process Azure STT/TTS data from custom fields (if enabled)
+                let azureSTTHours = 0;
+                let azureTTSChars = 0;
+                
+                if (enableAzureSTT || enableAzureTTS) {
+                    // Read Azure STT hours from custom4 (only if Azure STT is enabled)
+                    if (enableAzureSTT && analyticsRecord.custom4) {
+                        const custom4Str = String(analyticsRecord.custom4).trim();
+                        const parsed = parseFloat(custom4Str);
+                        if (!isNaN(parsed) && parsed > 0) {
+                            // Azure STT duration values from Microsoft Speech Services are ALWAYS in 100-nanosecond units (ticks)
+                            // Examples:
+                            //   - duration: 14,800,000 ticks = 1.48 seconds
+                            //   - offset: 1,900,000 ticks = 0.19 seconds
+                            // Conversion: 1 second = 10,000,000 (10 million) 100-nanosecond units
+                            // Formula to hours: (100-nanosecond units) / 10,000,000 / 3600 = hours
+                            
+                            // Determine format:
+                            // - Values >= 10,000 (0.001 seconds in ticks) are in 100-nanosecond units
+                            //   This catches even very short utterances (e.g., "yes" = ~0.5 seconds = 5,000,000 ticks)
+                            // - Values 0.1 to 10,000 are likely pre-converted to seconds
+                            // - Values < 0.1 are likely already in hours (pre-converted)
+                            
+                            if (parsed >= 10000) {
+                                // Definitely in 100-nanosecond units (Azure STT format)
+                                // Convert: ticks / 10,000,000 / 3600 = hours
+                                azureSTTHours = parsed / 10000000 / 3600;
+                                debugLog('Azure STT value auto-converted from 100-nanosecond units to hours', {
+                                    original: parsed,
+                                    ticks: parsed,
+                                    seconds: (parsed / 10000000).toFixed(3),
+                                    convertedHours: azureSTTHours,
+                                    record: {
+                                        id: analyticsRecord.id,
+                                        sessionId: analyticsRecord.sessionId,
+                                        timestamp: analyticsRecord.timestamp
+                                    }
+                                });
+                            } else if (parsed >= 0.1 && parsed < 10000) {
+                                // Likely pre-converted to seconds, convert to hours
+                                azureSTTHours = parsed / 3600;
+                                debugLog('Azure STT value auto-converted from seconds to hours', {
+                                    original: parsed,
+                                    converted: azureSTTHours,
+                                    record: {
+                                        id: analyticsRecord.id,
+                                        sessionId: analyticsRecord.sessionId,
+                                        timestamp: analyticsRecord.timestamp
+                                    }
+                                });
+                            } else {
+                                // Already in hours (pre-converted, typically < 0.1)
+                                azureSTTHours = parsed;
+                                debugLog('Azure STT value used as-is (assumed to be in hours)', {
+                                    value: parsed,
+                                    record: {
+                                        id: analyticsRecord.id,
+                                        sessionId: analyticsRecord.sessionId,
+                                        timestamp: analyticsRecord.timestamp
+                                    }
+                                });
+                            }
+                        } else if (analyticsRecord.custom4) {
+                            // Log when custom4 is present but not parseable
+                            debugLog('Azure STT custom4 ignored (not a valid number)', {
+                                custom4: custom4Str,
+                                parsed: parsed,
+                                record: {
+                                    id: analyticsRecord.id,
+                                    sessionId: analyticsRecord.sessionId,
+                                    timestamp: analyticsRecord.timestamp
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Read Azure TTS characters from custom5 (only if Azure TTS is enabled)
+                    // custom5 can contain either:
+                    // 1. A numeric character count (if pre-calculated)
+                    // 2. The actual TTS response text (in which case we count the characters)
+                    if (enableAzureTTS && analyticsRecord.custom5) {
+                        const custom5Str = String(analyticsRecord.custom5).trim();
+                        
+                        // First, check if it's a pure number (pre-calculated character count)
+                        const isNumeric = /^\d+(\.\d+)?$/.test(custom5Str);
+                        const parsed = parseFloat(custom5Str);
+                        
+                        if (isNumeric && !isNaN(parsed) && parsed > 0) {
+                            // Valid numeric character count (pre-calculated)
+                            azureTTSChars = parsed;
+                            debugLog('Azure TTS characters found in custom5 (numeric)', {
+                                custom5: custom5Str,
+                                characterCount: parsed,
+                                record: {
+                                    id: analyticsRecord.id,
+                                    sessionId: analyticsRecord.sessionId,
+                                    timestamp: analyticsRecord.timestamp
+                                }
+                            });
+                        } else if (custom5Str.length > 0) {
+                            // custom5 contains text - count the characters in the text
+                            // This is the actual TTS response, so we need to count characters for billing
+                            azureTTSChars = custom5Str.length;
+                            debugLog('Azure TTS characters calculated from custom5 text', {
+                                custom5Preview: custom5Str.substring(0, 100) + (custom5Str.length > 100 ? '...' : ''),
+                                characterCount: azureTTSChars,
+                                record: {
+                                    id: analyticsRecord.id,
+                                    sessionId: analyticsRecord.sessionId,
+                                    timestamp: analyticsRecord.timestamp
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Try JSON parsing if direct parse failed (for Azure only)
+                    if (azureSTTHours === 0 && azureTTSChars === 0) {
+                        // Field names are exactly custom4, custom5 (no variations)
+                        const customFields = [analyticsRecord.custom4, analyticsRecord.custom5];
+                        for (let i = 0; i < customFields.length; i++) {
+                            if (customFields[i]) {
+                                try {
+                                    const parsed = JSON.parse(customFields[i]);
+                                    if (i === 0 && enableAzureSTT && parsed.azureSTTHours !== undefined) {
+                                        azureSTTHours = parseFloat(parsed.azureSTTHours) || 0;
+                                        debugLog('Azure STT found in JSON custom4', {
+                                            json: parsed,
+                                            parsed: azureSTTHours,
+                                            record: {
+                                                id: analyticsRecord.id,
+                                                sessionId: analyticsRecord.sessionId
+                                            }
+                                        });
+                                    }
+                                    if (i === 1 && enableAzureTTS && parsed.azureTTSChars !== undefined) {
+                                        azureTTSChars = parseFloat(parsed.azureTTSChars) || 0;
+                                        debugLog('Azure TTS found in JSON custom5', {
+                                            json: parsed,
+                                            parsed: azureTTSChars,
+                                            record: {
+                                                id: analyticsRecord.id,
+                                                sessionId: analyticsRecord.sessionId
+                                            }
+                                        });
+                                    }
+                                } catch (e) {
+                                    // Not JSON, continue
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Log when Azure data is found (for debugging)
+                    if ((azureSTTHours > 0 || azureTTSChars > 0) && (enableAzureSTT || enableAzureTTS)) {
+                        debugLog('Azure data found in record', {
+                            azureSTTHours: azureSTTHours,
+                            azureTTSChars: azureTTSChars,
+                            custom4: analyticsRecord.custom4,
+                            custom5: analyticsRecord.custom5,
+                            record: {
+                                id: analyticsRecord.id,
+                                sessionId: analyticsRecord.sessionId,
+                                flowName: analyticsRecord.flowName,
+                                timestamp: analyticsRecord.timestamp
+                            }
+                        });
+                    }
+                }
+                
+                // Check if this record has any data to process (LLM tokens, Azure data, or Deepgram STT)
+                const hasLLMTokens = (inputTokens || outputTokens || totalTokens);
+                const hasAzureData = (azureSTTHours > 0 || azureTTSChars > 0);
+                const hasDeepgramSTT = (deepgramSTTMinutes > 0);
+                
+                // Debug logging removed - uncomment if needed for troubleshooting
+                // if (hasLLMTokens && (flowName === 'Call Completed' || flowName === 'Unknown')) {
+                //     console.log(`[DEBUG] Analytics record:`, { flowName, sessionId, tokens: totalTokens || (inputTokens + outputTokens) });
+                // }
+                
+                if (hasLLMTokens || hasAzureData || hasDeepgramSTT) {
+                    let matchedFlowName = flowName;
+                    let matchedSessionId = sessionId;
+                    let matchedFromConversation = false;
+                    
+                    // Only match to conversations if flowName is missing/Unknown AND we have a sessionId
+                    // This ensures we only match when we can be reasonably confident about the match
+                    if ((!flowName || flowName === 'Unknown') && sessionId) {
+                        const analyticsTime = new Date(timestamp).getTime();
+                        let bestMatch = null;
+                        let bestTimeDiff = Infinity;
+                        
+                        // Match by sessionId first (most accurate) - find closest conversation in time
+                        for (const conv of conversations) {
+                            if (conv.sessionId === sessionId) {
+                            const convTime = new Date(conv.timestamp).getTime();
+                            const timeDiff = Math.abs(analyticsTime - convTime);
+                                // Use a tighter time window (30 seconds) for more accurate matching
+                                // Find the closest conversation in time within 30 seconds
+                                if (timeDiff < 30000 && timeDiff < bestTimeDiff) {
+                                    bestMatch = conv;
+                                    bestTimeDiff = timeDiff;
+                                }
+                            }
+                        }
+                        
+                        if (bestMatch) {
+                            matchedSessionId = bestMatch.sessionId;
+                            matchedFlowName = bestMatch.flowName || 'Unknown';
+                            matchedFromConversation = true;
+                        }
+                        // If no match found with sessionId, leave as 'Unknown' rather than guessing
+                    }
+                    
+                    // Debug logging removed - uncomment if needed for troubleshooting
+                    // if (matchedFlowName === 'Call Completed' && hasLLMTokens) {
+                    //     console.log(`[DEBUG] "Call Completed" matched:`, { analyticsFlowName: flowName, matchedFromConversation, sessionId: matchedSessionId, tokens: totalTokens || (inputTokens + outputTokens) });
+                    // }
+                    
+                    if (matchedSessionId && matchedFlowName) {
+                        const key = `${matchedSessionId}|${matchedFlowName}`;
+                        
+                        // Process Azure data (if present) - NO LIMIT, process ALL records in date range
+                        // Azure STT/TTS values are per-turn usage that should be summed across all turns
+                        if (hasAzureData) {
+                            const existing = sessionFlowAzureUsage.get(key) || { sttHours: 0, ttsChars: 0 };
+                            // Accumulate Azure usage (sum all per-turn values in the date range)
+                            sessionFlowAzureUsage.set(key, {
+                                sttHours: existing.sttHours + azureSTTHours,
+                                ttsChars: existing.ttsChars + azureTTSChars,
+                                flowName: matchedFlowName,
+                                sessionId: matchedSessionId
+                            });
+                        }
+                        
+                        // Process Deepgram STT data (if present) - NO LIMIT, process ALL records in date range
+                        // Deepgram STT duration values are per-turn usage that should be summed across all turns
+                        if (hasDeepgramSTT) {
+                            const existing = sessionFlowDeepgramSTTUsage.get(key) || { sttMinutes: 0 };
+                            // Accumulate Deepgram STT usage (sum all per-turn values in the date range)
+                            sessionFlowDeepgramSTTUsage.set(key, {
+                                sttMinutes: existing.sttMinutes + deepgramSTTMinutes,
+                                flowName: matchedFlowName,
+                                sessionId: matchedSessionId
+                            });
+                        }
+                        
+                        // Process LLM tokens (if present) - SUM all per-turn values per session
+                        // Token values in custom1, custom2, custom3 are PER TURN (not cumulative)
+                        // Each record represents token usage for a specific turn, so we sum all records in the session
+                        // This gives us the total token usage across all turns in the session
+                        if (hasLLMTokens) {
+                            matchedCount++;
+                            // Track this session from analytics records (for accurate session counting)
+                            analyticsSessions.add(matchedSessionId);
+                            
+                            const existing = sessionFlowTokenSums.get(key);
+                            const turnTotal = totalTokens || (inputTokens + outputTokens);
+                            if (!existing) {
+                                // First record for this session+flow combination
+                                sessionFlowTokenSums.set(key, {
+                                    inputTokens: inputTokens,
+                                    outputTokens: outputTokens,
+                                    totalTokens: turnTotal,
+                                    flowName: matchedFlowName,
+                                    sessionId: matchedSessionId,
+                                    turnCount: 1  // Count turns from analytics records with token data
+                                });
+                            } else {
+                                // Accumulate token values by summing (per-turn values)
+                                existing.inputTokens += inputTokens;
+                                existing.outputTokens += outputTokens;
+                                existing.totalTokens += turnTotal;
+                                existing.turnCount = (existing.turnCount || 0) + 1;  // Increment turn count
+                            }
+                        }
+                    } else {
+                        if (hasLLMTokens) {
+                            unmatchedCount++;
+                        }
+                    }
+                }
+            });
+            
+            console.log(`Analytics processing complete: ${matchedCount} matched, ${unmatchedCount} unmatched, ${skippedCount} skipped`);
+            
+            // Summary: Show which flows have token data and their session+flow combinations
+            console.log('\n=== Flow Token Data Summary ===');
+            const flowSummary = new Map(); // flowName -> { sessionIds: Set, turnCount: number, tokenCount: number }
+            sessionFlowTokenSums.forEach((tokenData, key) => {
+                const flowName = tokenData.flowName;
+                if (!flowSummary.has(flowName)) {
+                    flowSummary.set(flowName, { sessionIds: new Set(), turnCount: 0, tokenCount: 0 });
+                }
+                const summary = flowSummary.get(flowName);
+                if (tokenData.sessionId) {
+                    summary.sessionIds.add(tokenData.sessionId);
+                }
+                summary.turnCount += tokenData.turnCount || 0;
+                summary.tokenCount += tokenData.totalTokens || 0;
+            });
+            
+            flowSummary.forEach((summary, flowName) => {
+                console.log(`${flowName}: ${summary.tokenCount.toLocaleString()} tokens, ${summary.turnCount} turns, ${summary.sessionIds.size} unique sessions`);
+                if (flowName === 'Call Completed') {
+                    console.log(`  [DEBUG] "Call Completed" session IDs:`, Array.from(summary.sessionIds).slice(0, 5));
+                }
+            });
+            
+            // Log Azure processing summary
+            if (enableAzureSTT || enableAzureTTS) {
+                let totalAzureSTTProcessed = 0;
+                let totalAzureTTSProcessed = 0;
+                sessionFlowAzureUsage.forEach((data, key) => {
+                    totalAzureSTTProcessed += data.sttHours || 0;
+                    totalAzureTTSProcessed += data.ttsChars || 0;
+                });
+                console.log(`Azure usage processing: ${sessionFlowAzureUsage.size} session+flow combinations with Azure data`);
+                if (enableAzureSTT) {
+                    console.log(`  - Azure STT: ${totalAzureSTTProcessed.toFixed(6)} hours processed from ${sessionFlowAzureUsage.size} session+flow combinations`);
+                }
+                if (enableAzureTTS) {
+                    console.log(`  - Azure TTS: ${totalAzureTTSProcessed.toLocaleString()} characters processed from ${sessionFlowAzureUsage.size} session+flow combinations`);
+                }
+            }
+            
+            // Log Deepgram STT processing summary
+            if (enableDeepgramSTT) {
+                let totalDeepgramSTTProcessed = 0;
+                sessionFlowDeepgramSTTUsage.forEach((data, key) => {
+                    totalDeepgramSTTProcessed += data.sttMinutes || 0;
+                });
+                console.log(`Deepgram STT usage processing: ${sessionFlowDeepgramSTTUsage.size} session+flow combinations with Deepgram STT data`);
+                console.log(`  - Deepgram STT: ${totalDeepgramSTTProcessed.toFixed(3)} minutes processed from ${sessionFlowDeepgramSTTUsage.size} session+flow combinations`);
+            }
+            console.log(`All records processed - no limits applied. Analyzer designed for large datasets (30-90+ days).`);
+
+            // Count turns from analytics records with token data (each record = 1 turn)
+            // This ensures turns match the token data source for accurate averages
+            sessionFlowTokenSums.forEach((tokenData, key) => {
+                const flowName = tokenData.flowName || 'Unknown';
+                if (flowTokenData[flowName]) {
+                    flowTokenData[flowName].inputTokens += tokenData.inputTokens;
+                    flowTokenData[flowName].outputTokens += tokenData.outputTokens;
+                    flowTokenData[flowName].totalTokens += tokenData.totalTokens;
+                    // Each analytics record with token data represents one turn
+                    flowTokenData[flowName].totalTurns += (tokenData.turnCount || 0);
+                }
+            });
+            
+            // Merge Azure STT/TTS usage into flow data
+            sessionFlowAzureUsage.forEach((azureData, key) => {
+                const flowName = azureData.flowName || 'Unknown';
+                if (flowTokenData[flowName]) {
+                    flowTokenData[flowName].azureSTTHours += azureData.sttHours;
+                    flowTokenData[flowName].azureTTSCharacters += azureData.ttsChars;
+                }
+            });
+            
+            // Aggregate Deepgram STT usage from custom6 per flow
+            sessionFlowDeepgramSTTUsage.forEach((deepgramData, key) => {
+                const flowName = deepgramData.flowName || 'Unknown';
+                        if (flowTokenData[flowName]) {
+                    flowTokenData[flowName].deepgramSTTMinutes += deepgramData.sttMinutes;
+                }
+            });
+            
+            console.log(`Processed ${Object.keys(flowTokenData).length} flow(s) with ${allSessions.size} total session(s)`);
+
+            // NOTE: We do NOT add turns from conversations for sessions without token data
+            // For billing/cost estimation, we ONLY count turns that have actual token usage
+            // This ensures accurate cost calculations based on empirical token data
+            
+            let totalInputTokens = 0;
+            let totalOutputTokens = 0;
+            let totalLLMTokens = 0;
+            let totalTurns = 0;
+            let totalAzureSTTHours = 0;
+            let totalAzureTTSChars = 0;
+            
+            // Only count turns and tokens from flows that have actual token data
+            // This ensures billing accuracy - we only count usage that incurred costs
+            Object.keys(flowTokenData).forEach(flowName => {
+                const flow = flowTokenData[flowName];
+                totalInputTokens += flow.inputTokens;
+                totalOutputTokens += flow.outputTokens;
+                totalLLMTokens += flow.totalTokens;
+                // Only count turns if the flow has token data (for billing accuracy)
+                if (flow.totalTokens > 0) {
+                    totalTurns += flow.totalTurns;
+                }
+                totalAzureSTTHours += flow.azureSTTHours || 0;
+                totalAzureTTSChars += flow.azureTTSCharacters || 0;
+            });
+
+            // Count unique sessions per flow that have token data by extracting sessionIds from sessionFlowTokenSums
+            // This ensures we ONLY count sessions with actual token data for each flow, not all sessions in the date range
+            const flowSessionCounts = new Map(); // flowName -> Set of sessionIds with token data
+            sessionFlowTokenSums.forEach((tokenData, key) => {
+                if (tokenData.sessionId && tokenData.flowName) {
+                    if (!flowSessionCounts.has(tokenData.flowName)) {
+                        flowSessionCounts.set(tokenData.flowName, new Set());
+                    }
+                    flowSessionCounts.get(tokenData.flowName).add(tokenData.sessionId);
+                }
+            });
+            
+            // Set sessionCount for each flow based on sessions with token data
+            Object.keys(flowTokenData).forEach(flowName => {
+                const sessionsWithTokens = flowSessionCounts.get(flowName);
+                flowTokenData[flowName].sessionCount = sessionsWithTokens ? sessionsWithTokens.size : 0;
+            });
+            
+            // Debug: Log flow-level session counts for verification
+            console.log('Flow-level session counts (sessions with token data per flow):');
+            Object.keys(flowTokenData).forEach(flowName => {
+                const flow = flowTokenData[flowName];
+                if (flow.totalTokens > 0) {
+                    console.log(`  ${flowName}: ${flow.sessionCount} sessions, ${flow.totalTokens} tokens, ${flow.totalTurns} turns`);
+                }
+            });
+
+            // Count unique sessions that have token data by extracting sessionIds from sessionFlowTokenSums
+            // This ensures we ONLY count sessions with actual token data, not all sessions in the date range
+            const uniqueSessionsWithTokens = new Set();
+            sessionFlowTokenSums.forEach((tokenData, key) => {
+                if (tokenData.sessionId) {
+                    uniqueSessionsWithTokens.add(tokenData.sessionId);
+                }
+            });
+            const sessionCount = uniqueSessionsWithTokens.size > 0 ? uniqueSessionsWithTokens.size : analyticsSessions.size;
+            
+            // Validation summary for billing/cost estimation accuracy
+            console.log('=== TOKEN USAGE VALIDATION SUMMARY (for billing/cost estimation) ===');
+            console.log(`Total LLM Input Tokens: ${totalInputTokens.toLocaleString()}`);
+            console.log(`Total LLM Output Tokens: ${totalOutputTokens.toLocaleString()}`);
+            console.log(`Total LLM Tokens: ${totalLLMTokens.toLocaleString()}`);
+            console.log(`Total Turns (analytics records with token data): ${totalTurns}`);
+            console.log(`Unique Sessions with Token Data: ${sessionCount}`);
+            console.log(`Average Tokens per Session: ${sessionCount > 0 ? (totalLLMTokens / sessionCount).toFixed(2) : 0}`);
+            console.log(`Average Tokens per Turn: ${totalTurns > 0 ? (totalLLMTokens / totalTurns).toFixed(2) : 0}`);
+            
+            // Verify flow-level totals match overall totals
+            let flowTokensSum = 0;
+            let flowTurnsSum = 0;
+            let flowSessionsSum = 0;
+            Object.keys(flowTokenData).forEach(flowName => {
+                const flow = flowTokenData[flowName];
+                flowTokensSum += flow.totalTokens;
+                // Only count turns from flows with token data
+                if (flow.totalTokens > 0) {
+                    flowTurnsSum += flow.totalTurns;
+                }
+                flowSessionsSum += flow.sessionCount;
+            });
+            console.log(`\nValidation Checks:`);
+            console.log(`  Flow tokens sum matches total: ${flowTokensSum === totalLLMTokens ? '✓' : '✗'} (${flowTokensSum.toLocaleString()} vs ${totalLLMTokens.toLocaleString()})`);
+            console.log(`  Flow turns sum matches total: ${flowTurnsSum === totalTurns ? '✓' : '✗'} (${flowTurnsSum} vs ${totalTurns})`);
+            console.log(`  Flow sessions sum: ${flowSessionsSum} (NOTE: This can be > total unique sessions because a session can use multiple flows)`);
+            console.log(`  Total unique sessions: ${sessionCount} (sessions counted once across all flows)`);
+            console.log(`  Session count source: uniqueSessionsWithTokens=${uniqueSessionsWithTokens.size}, analyticsSessions=${analyticsSessions.size}, allSessions=${allSessions.size}`);
+            console.log('=== END VALIDATION SUMMARY ===');
+
+            return {
+                flows: flowTokenData,
+                sessionToFlows: sessionToFlows,
+                totals: {
+                    inputTokens: totalInputTokens,
+                    outputTokens: totalOutputTokens,
+                    totalTokens: totalLLMTokens,
+                    stt: 0,
+                    tts: 0,
+                    sttMinutes: 0,
+                    ttsCharacters: 0,
+                    // Provider-specific breakdowns
+                    deepgramSTT: { minutes: 0, tokens: 0 },
+                    deepgramTTS: { characters: 0, tokens: 0 },
+                    elevenlabsTTS: { characters: 0, tokens: 0 },
+                    azureSTT: { hours: totalAzureSTTHours, tokens: 0 },
+                    azureTTS: { characters: totalAzureTTSChars, tokens: 0 },
+                    sessions: sessionCount, // ONLY count unique sessions with token data
+                    totalTurns: totalTurns,
+                    avgTurnsPerSession: sessionCount > 0 ? (totalTurns / sessionCount) : 0
+                }
+            };
+        }
+
+        // Display token metrics
+        function displayTokenMetrics() {
+            if (!tokenData) return;
+
+            const metricsEl = document.getElementById('tokenMetrics');
+            metricsEl.style.display = 'block';
+
+            document.getElementById('totalLLMInputTokens').textContent = tokenData.totals.inputTokens.toLocaleString();
+            document.getElementById('totalLLMOutputTokens').textContent = tokenData.totals.outputTokens.toLocaleString();
+            document.getElementById('totalLLMTokens').textContent = tokenData.totals.totalTokens.toLocaleString();
+            applyProviderLabelsAndValues();
+            
+            // Average tokens per session = total tokens across all sessions / number of sessions
+            const avgLLM = tokenData.totals.sessions > 0 ? (tokenData.totals.totalTokens / tokenData.totals.sessions).toFixed(0) : 0;
+            document.getElementById('avgLLMTokens').textContent = parseFloat(avgLLM).toLocaleString();
+            
+            document.getElementById('totalSessions').textContent = tokenData.totals.sessions.toLocaleString();
+            document.getElementById('totalTurns').textContent = (tokenData.totals.totalTurns || 0).toLocaleString();
+            
+            const avgTurns = tokenData.totals.avgTurnsPerSession || 0;
+            document.getElementById('avgTurnsPerSession').textContent = avgTurns.toFixed(1);
+            
+            // Average tokens per turn = total tokens across all sessions / total number of turns
+            const tokensPerTurn = tokenData.totals.totalTurns > 0 ? (tokenData.totals.totalTokens / tokenData.totals.totalTurns).toFixed(1) : 0;
+            document.getElementById('avgTokensPerTurn').textContent = tokensPerTurn;
+
+            createTokenFlowChart();
+            createTokenTimeChart();
+            updateTokenUsageTable();
+            updateBillingNotes();
+            displayProviderMetrics();
+            updateDebugDisplay();
+        }
+        
+        // Display provider-specific STT/TTS metrics
+        function displayProviderMetrics() {
+            if (!tokenData) return;
+            const sessions = tokenData.totals.sessions || 1;
+            
+            // Deepgram STT
+            const deepgramSTTMinutes = tokenData.totals.deepgramSTT?.minutes || 0;
+            if (deepgramSTTMinutes > 0) {
+                document.getElementById('deepgramSTTCard').style.display = 'block';
+                document.getElementById('deepgramSTTMinutes').textContent = deepgramSTTMinutes.toLocaleString();
+                document.getElementById('deepgramSTTAvgCard').style.display = 'block';
+                document.getElementById('deepgramSTTAvgValue').textContent = (deepgramSTTMinutes / sessions).toFixed(1);
+            } else {
+                document.getElementById('deepgramSTTCard').style.display = 'none';
+                document.getElementById('deepgramSTTAvgCard').style.display = 'none';
+            }
+            
+            // Deepgram TTS
+            const deepgramTTSChars = tokenData.totals.deepgramTTS?.characters || 0;
+            if (deepgramTTSChars > 0) {
+                document.getElementById('deepgramTTSCard').style.display = 'block';
+                document.getElementById('deepgramTTSCharacters').textContent = deepgramTTSChars.toLocaleString();
+                document.getElementById('deepgramTTSAvgCard').style.display = 'block';
+                document.getElementById('deepgramTTSAvgValue').textContent = Math.round(deepgramTTSChars / sessions).toLocaleString();
+            } else {
+                document.getElementById('deepgramTTSCard').style.display = 'none';
+                document.getElementById('deepgramTTSAvgCard').style.display = 'none';
+            }
+            
+            // ElevenLabs TTS
+            const elevenlabsTTSChars = tokenData.totals.elevenlabsTTS?.characters || 0;
+            if (elevenlabsTTSChars > 0) {
+                document.getElementById('elevenlabsTTSCard').style.display = 'block';
+                document.getElementById('elevenlabsTTSCharacters').textContent = elevenlabsTTSChars.toLocaleString();
+                document.getElementById('elevenlabsTTSAvgCard').style.display = 'block';
+                document.getElementById('elevenlabsTTSAvgValue').textContent = Math.round(elevenlabsTTSChars / sessions).toLocaleString();
+            } else {
+                document.getElementById('elevenlabsTTSCard').style.display = 'none';
+                document.getElementById('elevenlabsTTSAvgCard').style.display = 'none';
+            }
+            
+            // Azure STT (only show if enabled)
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+            const azureSTTHours = tokenData.totals.azureSTT?.hours || 0;
+            if (enableAzureSTT && azureSTTHours > 0) {
+                document.getElementById('azureSTTCard').style.display = 'block';
+                document.getElementById('azureSTTHours').textContent = azureSTTHours.toFixed(4);
+                document.getElementById('azureSTTAvgCard').style.display = 'block';
+                document.getElementById('azureSTTAvgValue').textContent = (azureSTTHours / sessions).toFixed(4);
+            } else {
+                document.getElementById('azureSTTCard').style.display = 'none';
+                document.getElementById('azureSTTAvgCard').style.display = 'none';
+            }
+            
+            // Azure TTS (only show if enabled)
+            const enableAzureTTS = DASHBOARD_CONFIG.ENABLE_AZURE_TTS;
+            const azureTTSChars = tokenData.totals.azureTTS?.characters || 0;
+            if (enableAzureTTS && azureTTSChars > 0) {
+                document.getElementById('azureTTSCard').style.display = 'block';
+                document.getElementById('azureTTSCharacters').textContent = azureTTSChars.toLocaleString();
+                document.getElementById('azureTTSAvgCard').style.display = 'block';
+                document.getElementById('azureTTSAvgValue').textContent = Math.round(azureTTSChars / sessions).toLocaleString();
+            } else {
+                document.getElementById('azureTTSCard').style.display = 'none';
+                document.getElementById('azureTTSAvgCard').style.display = 'none';
+            }
+        }
+
+        // Update STT/TTS labels and values based on configured providers and native units
+        function applyProviderLabelsAndValues() {
+            const sttLabelEl = document.getElementById('sttLabel');
+            const ttsLabelEl = document.getElementById('ttsLabel');
+            const sttValEl = document.getElementById('totalSTTTokens');
+            const ttsValEl = document.getElementById('totalTTSTokens');
+
+            const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+            const enableDeepgramTTS = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_TTS;
+                const enableElevenLabs = DASHBOARD_CONFIG.ENABLE_ELEVENLABS_TTS;
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+            const enableAzureTTS = DASHBOARD_CONFIG.ENABLE_AZURE_TTS;
+            
+            // Get Azure usage (only if enabled)
+            const azureSTTHours = (enableAzureSTT && tokenData?.totals?.azureSTT?.hours) || 0;
+            const azureTTSChars = (enableAzureTTS && tokenData?.totals?.azureTTS?.characters) || 0;
+            const hasAzure = enableAzureSTT || enableAzureTTS;
+
+            // STT: Deepgram minutes, Azure hours
+            const sttMinutes = tokenData?.totals?.sttMinutes || 0;
+            const sttTokens = tokenData?.totals?.stt || 0;
+            let sttLabel = 'Total STT';
+            let sttValue = sttTokens.toLocaleString();
+
+            if (enableDeepgramSTT && enableAzureSTT) {
+                sttLabel = 'Total STT (minutes/hours)';
+                // Show combined: Deepgram minutes + Azure hours (converted to minutes)
+                const totalMinutes = sttMinutes + (azureSTTHours * 60);
+                sttValue = totalMinutes > 0 ? totalMinutes.toLocaleString() : (sttTokens || 0).toLocaleString();
+            } else if (enableDeepgramSTT) {
+                sttLabel = 'Total STT (minutes)';
+                sttValue = sttMinutes > 0 ? sttMinutes.toLocaleString() : (sttTokens || 0).toLocaleString();
+            } else if (enableAzureSTT) {
+                sttLabel = 'Total STT (hours)';
+                sttValue = azureSTTHours > 0 ? azureSTTHours.toFixed(4) : '0';
+            }
+            sttLabelEl.textContent = sttLabel;
+            sttValEl.textContent = sttValue;
+
+            // TTS: Characters for Deepgram/ElevenLabs/Azure
+            const ttsChars = tokenData?.totals?.ttsCharacters || 0;
+            const ttsTokens = tokenData?.totals?.tts || 0;
+            if (enableDeepgramTTS || enableElevenLabs || enableAzureTTS) {
+                ttsLabelEl.textContent = 'Total TTS (characters)';
+                ttsValEl.textContent = ttsChars > 0 ? ttsChars.toLocaleString() : ttsTokens.toLocaleString();
+            } else {
+                ttsLabelEl.textContent = 'Total TTS';
+                ttsValEl.textContent = ttsTokens.toLocaleString();
+            }
+        }
+
+        // Display provider billing units based on configured keys
+        function updateBillingNotes() {
+            const notesEl = document.getElementById('billingNotes');
+            if (!notesEl) return;
+
+            const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+            const enableDeepgramTTS = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_TTS;
+                const enableElevenLabs = DASHBOARD_CONFIG.ENABLE_ELEVENLABS_TTS;
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+            const enableAzureTTS = DASHBOARD_CONFIG.ENABLE_AZURE_TTS;
+
+            const items = [];
+            if (enableDeepgramSTT || enableDeepgramTTS) {
+                const deepgramNotes = [];
+                if (enableDeepgramSTT) deepgramNotes.push('STT bills on minutes of audio');
+                if (enableDeepgramTTS) deepgramNotes.push('TTS bills on characters');
+                items.push(`Deepgram ${deepgramNotes.join('; ')}.`);
+            }
+            if (enableElevenLabs) {
+                items.push('ElevenLabs TTS bills on characters.');
+            }
+            if (enableAzureSTT || enableAzureTTS) {
+                const azureNotes = [];
+                if (enableAzureSTT) azureNotes.push('STT bills on hours of audio processed');
+                if (enableAzureTTS) azureNotes.push('TTS bills per million characters');
+                items.push(`Azure ${azureNotes.join('; ')}.`);
+            }
+
+            if (items.length === 0) {
+                notesEl.textContent = 'STT/TTS providers not enabled. Enable checkboxes to see provider billing units.';
+            } else {
+                notesEl.innerHTML = items.map(i => `• ${i}`).join('<br>');
+            }
+        }
+
+        // Create token usage by flow chart
+        function createTokenFlowChart() {
+            const ctx = document.getElementById('tokenFlowChart').getContext('2d');
+            
+            if (tokenCharts.flow) {
+                tokenCharts.flow.destroy();
+            }
+
+            // Check which STT/TTS providers are enabled
+            const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+
+            // Filter out flows with no token usage (no LLM, STT, or TTS tokens)
+            const flows = Object.values(tokenData.flows).filter(f => {
+                const hasSTT = enableDeepgramSTT ? (f.deepgramSTTMinutes > 0) : 
+                              enableAzureSTT ? (f.azureSTTHours > 0) : 
+                              (f.sttTokens > 0);
+                return (f.totalTokens > 0 || hasSTT || f.ttsTokens > 0);
+            });
+            
+            const flowNames = flows.map(f => f.flowName);
+            const llmData = flows.map(f => f.totalTokens);
+            
+            // Use appropriate STT data based on enabled provider
+            let sttData, sttLabel;
+            if (enableDeepgramSTT) {
+                // Use Deepgram STT minutes
+                sttData = flows.map(f => f.deepgramSTTMinutes || 0);
+                sttLabel = 'STT Minutes';
+            } else if (enableAzureSTT) {
+                // Use Azure STT hours (convert to minutes for consistency)
+                sttData = flows.map(f => (f.azureSTTHours || 0) * 60);
+                sttLabel = 'STT Minutes';
+            } else {
+                // Fallback to tokenized STT
+                sttData = flows.map(f => f.sttTokens || 0);
+                sttLabel = 'STT Tokens';
+            }
+            
+            const ttsData = flows.map(f => f.ttsTokens);
+
+            tokenCharts.flow = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: flowNames,
+                    datasets: [
+                        {
+                            label: 'LLM Tokens',
+                            data: llmData,
+                            backgroundColor: 'rgba(79, 172, 254, 0.6)',
+                            borderColor: 'rgba(79, 172, 254, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: sttLabel,
+                            data: sttData,
+                            backgroundColor: 'rgba(6, 182, 212, 0.6)',
+                            borderColor: 'rgba(6, 182, 212, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'TTS Tokens',
+                            data: ttsData,
+                            backgroundColor: 'rgba(139, 92, 246, 0.6)',
+                            borderColor: 'rgba(139, 92, 246, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create token usage over time chart
+        function createTokenTimeChart() {
+            const ctx = document.getElementById('tokenTimeChart').getContext('2d');
+            
+            if (tokenCharts.time) {
+                tokenCharts.time.destroy();
+            }
+
+            // Check which STT provider is enabled for label
+            const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+            const sttLabel = (enableDeepgramSTT || enableAzureSTT) ? 'STT Minutes' : 'STT Tokens';
+            
+            // Process time-series data from conversations and analytics
+            const timeSeriesData = processTimeSeriesData();
+            
+            tokenCharts.time = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeSeriesData.labels,
+                    datasets: [
+                        {
+                            label: 'LLM Tokens',
+                            data: timeSeriesData.llmData,
+                            backgroundColor: 'rgba(79, 172, 254, 0.2)',
+                            borderColor: 'rgba(79, 172, 254, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: sttLabel,
+                            data: timeSeriesData.sttData,
+                            backgroundColor: 'rgba(6, 182, 212, 0.2)',
+                            borderColor: 'rgba(6, 182, 212, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'TTS Tokens',
+                            data: timeSeriesData.ttsData,
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            borderColor: 'rgba(139, 92, 246, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Process time-series data from conversations and analytics
+        function processTimeSeriesData() {
+            if (!tokenData || !window.conversationsData || !window.analyticsData) {
+                return { labels: [], llmData: [], sttData: [], ttsData: [] };
+            }
+            
+            const conversations = window.conversationsData || [];
+            const analytics = window.analyticsData || [];
+            
+            // Determine time granularity based on date range
+            const dateField = DASHBOARD_CONFIG.DATE_FIELD;
+            const fromDate = document.getElementById('tokenFromDate').value;
+            const toDate = document.getElementById('tokenToDate').value;
+            
+            if (!fromDate || !toDate) {
+                return { labels: [], llmData: [], sttData: [], ttsData: [] };
+            }
+            
+            const startDate = new Date(fromDate);
+            const endDate = new Date(toDate);
+            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            
+            // Use hourly granularity if range is <= 7 days, otherwise daily
+            const useHours = daysDiff <= 7;
+            const timeMap = new Map(); // "YYYY-MM-DD" or "YYYY-MM-DD HH:00" -> { llm, stt, tts }
+            
+            // Check which STT/TTS providers are enabled
+            const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+            
+            // Process analytics for LLM tokens and STT/TTS
+            analytics.forEach(record => {
+                const timestamp = record[dateField] || record.timestamp || record.date || record.time;
+                if (!timestamp) return;
+                
+                const date = new Date(timestamp);
+                if (isNaN(date.getTime())) return;
+                
+                const timeKey = useHours 
+                    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`
+                    : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                
+                if (!timeMap.has(timeKey)) {
+                    timeMap.set(timeKey, { llm: 0, stt: 0, tts: 0 });
+                }
+                
+                const timeData = timeMap.get(timeKey);
+                
+                // LLM tokens from custom fields
+                const inputTokens = parseFloat(record.custom1) || 0;
+                const outputTokens = parseFloat(record.custom2) || 0;
+                const totalTokens = parseFloat(record.custom3) || 0;
+                timeData.llm += totalTokens || (inputTokens + outputTokens);
+                
+                // Deepgram STT from custom6 (seconds, convert to minutes)
+                if (enableDeepgramSTT && record.custom6) {
+                    const custom6Value = parseFloat(record.custom6);
+                    if (!isNaN(custom6Value) && custom6Value > 0) {
+                        // custom6 contains seconds, convert to minutes
+                        const minutes = custom6Value / 60;
+                        timeData.stt += minutes;
+                    }
+                }
+                
+                // Azure STT/TTS from custom fields
+                let azureSTTHours = 0;
+                let azureTTSChars = 0;
+                
+                if (enableAzureSTT && record.custom4) {
+                    const parsed = parseFloat(record.custom4);
+                    if (!isNaN(parsed) && parsed > 0) {
+                        // Azure STT duration values from Microsoft Speech Services are in 100-nanosecond units
+                        // Use same conversion logic as main processing:
+                        // - Values >= 10,000 (0.001 seconds in ticks) are in 100-nanosecond units
+                        // - Values 0.1-10,000 are likely pre-converted to seconds
+                        // - Values < 0.1 are likely already in hours
+                        if (parsed >= 10000) {
+                            azureSTTHours = parsed / 10000000 / 3600; // Convert from 100-nanosecond units to hours
+                        } else if (parsed >= 0.1 && parsed < 10000) {
+                            azureSTTHours = parsed / 3600; // Convert from seconds to hours
+                        } else {
+                            azureSTTHours = parsed; // Already in hours
+                        }
+                        // Convert Azure STT hours to minutes for consistency
+                        timeData.stt += azureSTTHours * 60;
+                    }
+                }
+                
+                if (record.custom5) {
+                    const str = String(record.custom5).trim();
+                    if (str.length > 0) {
+                        // Check if it's a numeric value (pre-calculated character count)
+                        const isNumeric = /^\d+(\.\d+)?$/.test(str);
+                        const parsed = parseFloat(str);
+                        if (isNumeric && !isNaN(parsed) && parsed > 0) {
+                            azureTTSChars = parsed; // Use numeric value as-is
+                        } else {
+                            azureTTSChars = str.length; // Count characters in TTS response text
+                        }
+                    }
+                }
+                
+                timeData.tts += azureTTSChars;
+            });
+            
+            // Sort time keys chronologically
+            const sortedKeys = Array.from(timeMap.keys()).sort();
+            
+            // If no data, return empty
+            if (sortedKeys.length === 0) {
+                return { labels: [], llmData: [], sttData: [], ttsData: [] };
+            }
+            
+            // Generate labels and data arrays
+            const labels = sortedKeys.map(key => {
+                if (useHours) {
+                    // Format: "MM/DD HH:00"
+                    const [datePart, timePart] = key.split(' ');
+                    const [year, month, day] = datePart.split('-');
+                    return `${month}/${day} ${timePart}`;
+                } else {
+                    // Format: "MM/DD"
+                    const [year, month, day] = key.split('-');
+                    return `${month}/${day}`;
+                }
+            });
+            
+            const llmData = sortedKeys.map(key => timeMap.get(key).llm);
+            const sttData = sortedKeys.map(key => timeMap.get(key).stt);
+            const ttsData = sortedKeys.map(key => timeMap.get(key).tts);
+            
+            return { labels, llmData, sttData, ttsData };
+        }
+
+        // Update token usage table
+        function updateTokenUsageTable() {
+            const tbody = document.getElementById('tokenUsageTableBody');
+            tbody.innerHTML = '';
+
+            // Check which STT provider is enabled
+            const enableDeepgramSTT = DASHBOARD_CONFIG.ENABLE_DEEPGRAM_STT;
+            const enableAzureSTT = DASHBOARD_CONFIG.ENABLE_AZURE_STT;
+            
+            // Update table header based on enabled provider
+            const sttHeader = document.getElementById('sttTokensHeader');
+            if (enableDeepgramSTT || enableAzureSTT) {
+                sttHeader.textContent = 'STT Minutes';
+            } else {
+                sttHeader.textContent = 'STT Tokens';
+            }
+
+            // Filter out flows with no token usage (no LLM, STT, or TTS tokens)
+            const flows = Object.values(tokenData.flows)
+                .filter(f => {
+                    const hasSTT = enableDeepgramSTT ? (f.deepgramSTTMinutes > 0) : 
+                                  enableAzureSTT ? (f.azureSTTHours > 0) : 
+                                  (f.sttTokens > 0);
+                    return (f.totalTokens > 0 || hasSTT || f.ttsTokens > 0);
+                })
+                .sort((a, b) => b.totalTokens - a.totalTokens);
+
+            flows.forEach(flow => {
+                const row = document.createElement('tr');
+                const avgLLM = flow.sessionCount > 0 ? (flow.totalTokens / flow.sessionCount).toFixed(0) : 0;
+                
+                // For STT total: if Deepgram STT is enabled, show minutes; if Azure, show hours converted to minutes; otherwise tokens
+                let sttDisplayValue;
+                if (enableDeepgramSTT && flow.deepgramSTTMinutes > 0) {
+                    // Display Deepgram STT minutes, convert to seconds if less than 1 minute
+                    const totalSeconds = flow.deepgramSTTMinutes * 60;
+                    if (totalSeconds < 60) {
+                        sttDisplayValue = totalSeconds.toFixed(1) + 's';
+                    } else {
+                        sttDisplayValue = flow.deepgramSTTMinutes.toFixed(3) + 'm';
+                    }
+                } else if (enableAzureSTT && flow.azureSTTHours > 0) {
+                    // Display Azure STT hours converted to minutes
+                    const totalMinutes = flow.azureSTTHours * 60;
+                    const totalSeconds = totalMinutes * 60;
+                    if (totalSeconds < 60) {
+                        sttDisplayValue = totalSeconds.toFixed(1) + 's';
+                    } else {
+                        sttDisplayValue = totalMinutes.toFixed(3) + 'm';
+                    }
+                } else {
+                    // Fallback to tokenized STT
+                    sttDisplayValue = flow.sttTokens.toLocaleString();
+                }
+                
+                // For STT average: if Deepgram STT is enabled and flow has Deepgram STT data, show minutes per session
+                // Otherwise, show token average
+                let avgSTT;
+                if (enableDeepgramSTT && flow.deepgramSTTMinutes > 0) {
+                    // Calculate average Deepgram STT minutes per session, convert to seconds for display
+                    const avgMinutes = flow.sessionCount > 0 ? (flow.deepgramSTTMinutes / flow.sessionCount) : 0;
+                    const avgSeconds = avgMinutes * 60;
+                    // Show seconds if less than 60, otherwise show minutes with 2 decimals
+                    avgSTT = avgSeconds < 60 ? avgSeconds.toFixed(1) + 's' : avgMinutes.toFixed(3) + 'm';
+                } else if (enableAzureSTT && flow.azureSTTHours > 0) {
+                    // Calculate average Azure STT hours per session, convert to minutes/seconds
+                    const avgHours = flow.sessionCount > 0 ? (flow.azureSTTHours / flow.sessionCount) : 0;
+                    const avgMinutes = avgHours * 60;
+                    const avgSeconds = avgMinutes * 60;
+                    avgSTT = avgSeconds < 60 ? avgSeconds.toFixed(1) + 's' : avgMinutes.toFixed(3) + 'm';
+                } else {
+                    // Fallback to token average
+                    avgSTT = flow.sessionCount > 0 ? (flow.sttTokens / flow.sessionCount).toFixed(0) : 0;
+                }
+                
+                const avgTTS = flow.sessionCount > 0 ? (flow.ttsTokens / flow.sessionCount).toFixed(0) : 0;
+                
+                const avgTurnsPerSession = flow.sessionCount > 0 ? (flow.totalTurns / flow.sessionCount).toFixed(1) : 0;
+                const tokensPerTurn = flow.totalTurns > 0 ? Math.round(flow.totalTokens / flow.totalTurns) : 0;
+                
+                // Calculate total tokens for display (LLM + TTS, STT is separate when using minutes)
+                const totalTokens = flow.totalTokens + flow.ttsTokens + (enableDeepgramSTT || enableAzureSTT ? 0 : flow.sttTokens);
+
+                row.innerHTML = `
+                    <td>${flow.flowName}</td>
+                    <td>${flow.inputTokens.toLocaleString()}</td>
+                    <td>${flow.outputTokens.toLocaleString()}</td>
+                    <td>${flow.totalTokens.toLocaleString()}</td>
+                    <td>${sttDisplayValue}</td>
+                    <td>${flow.ttsTokens.toLocaleString()}</td>
+                    <td>${totalTokens.toLocaleString()}</td>
+                    <td>${flow.sessionCount}</td>
+                    <td>${flow.totalTurns.toLocaleString()}</td>
+                    <td>${avgTurnsPerSession}</td>
+                    <td>${parseInt(avgLLM).toLocaleString()}</td>
+                    <td>${avgSTT}</td>
+                    <td>${parseInt(avgTTS).toLocaleString()}</td>
+                    <td>${tokensPerTurn}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // IndexedDB helper for reading large datasets
+        const dbName = 'TokenAnalyzerStandaloneDB';
+        const dbVersion = 1;
+        let db = null;
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                if (db) {
+                    resolve(db);
+                    return;
+                }
+                const request = indexedDB.open(dbName, dbVersion);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('conversations')) {
+                        db.createObjectStore('conversations', { keyPath: 'id', autoIncrement: false });
+                    }
+                    if (!db.objectStoreNames.contains('analytics')) {
+                        db.createObjectStore('analytics', { keyPath: 'id', autoIncrement: false });
+                    }
+                    if (!db.objectStoreNames.contains('dataArrays')) {
+                        db.createObjectStore('dataArrays');
+                    }
+                };
+            });
+        }
+
+        async function getFromIndexedDB(key) {
+            try {
+                const database = await openDB();
+                return new Promise((resolve, reject) => {
+                    const transaction = database.transaction(['dataArrays'], 'readonly');
+                    const store = transaction.objectStore('dataArrays');
+                    const request = store.get(key);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            } catch (error) {
+                console.error(`Error reading ${key} from IndexedDB:`, error);
+                return null;
+            }
+        }
+
+        async function saveToIndexedDB(key, data) {
+            try {
+                const database = await openDB();
+                return new Promise((resolve, reject) => {
+                    const transaction = database.transaction(['dataArrays'], 'readwrite');
+                    const store = transaction.objectStore('dataArrays');
+                    const request = store.put(data, key);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            } catch (error) {
+                console.error(`Error saving ${key} to IndexedDB:`, error);
+                throw error;
+            }
+        }
+
+        function exportTokenUsageTable() {
+            const table = document.getElementById('tokenUsageTable');
+            if (!table) return alert('No table data to export.');
+
+            const fromDate = document.getElementById('tokenFromDate').value || 'N/A';
+            const toDate = document.getElementById('tokenToDate').value || 'N/A';
+
+            // Extract headers
+            const headers = [];
+            table.querySelectorAll('thead th').forEach(th => headers.push(th.textContent.trim()));
+
+            // Extract rows
+            const dataRows = [];
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                const row = [];
+                tr.querySelectorAll('td').forEach(td => {
+                    const val = td.textContent.trim().replace(/,/g, '');
+                    row.push(isNaN(val) || val === '' ? td.textContent.trim() : Number(val));
+                });
+                if (row.length) dataRows.push(row);
+            });
+
+            if (!dataRows.length) return alert('No data in table to export.');
+
+            // Build worksheet data
+            const wsData = [
+                ['Token Usage by Flow'],
+                ['Report Period: ' + fromDate + ' to ' + toDate],
+                [],
+                headers,
+                ...dataRows
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Style: merge title and date range rows across all columns
+            const colCount = headers.length;
+            ws['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: colCount - 1 } }
+            ];
+
+            // Auto-width columns
+            ws['!cols'] = headers.map((h, i) => {
+                let maxLen = h.length;
+                dataRows.forEach(row => {
+                    const cellLen = String(row[i] ?? '').length;
+                    if (cellLen > maxLen) maxLen = cellLen;
+                });
+                return { wch: Math.max(maxLen + 3, 14) };
+            });
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Token Usage by Flow');
+            XLSX.writeFile(wb, 'Token_Usage_By_Flow.xlsx');
+        }
+
+        // Initialize page (no persistence of API keys or config)
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fields start empty on each load; no localStorage hooks.
+        });
+    </script>
+</body>
+</html>
+

@@ -80,24 +80,72 @@ Create a build script following `build-office-depot.js` as the reference. The sp
 - Include 2-3 recent orders/cases/appointments
 - Make addresses, phone numbers, and IDs plausible
 
-### 4. Build
+### 4. Pre-Build Skill Review (MANDATORY before running node)
+Before running the build script, audit the spec against these three skills. This catches bugs before a broken ZIP gets delivered:
+
+- **`instruction-patterns`**: Are all standard ALWAYS/NEVER/Confirmation rules present verbatim? Is the greeting in #INTRO? Does agentJobConfig.instructions reference `{{context.instructions}}`?
+- **`tool-design`**: Does every parameters block omit `required` when nothing is required (never `required: []`)? Does every tool answer use `{{context.xxxResult}}`? Does any tool with multiple resolution paths use the instructional answer pattern to prevent listing steps?
+- **`voice-config`**: Any em dashes, markdown, or URLs in agent-facing text?
+
+Fix issues in the build script before proceeding. Takes 5 minutes and prevents a broken import.
+
+### 5. Build
 ```bash
 node build-[company].js
 ```
+Always run this. Never leave a build script as an unrun artifact -- a script that hasn't been executed is not a finished demo.
 
-### 5. Validate
+### 6. Validate
 ```bash
 # No directory entries in ZIP (no size-0 lines)
 unzip -l ./Output.zip | grep "^        0"
 # Should return nothing
 ```
+Note: clone-and-modify also runs a pre-flight validation automatically during the build, printing warnings for common mistakes (missing mock, required:[], empty instructions). Review those before delivering.
 
-### 6. Deliver
+### 7. Deliver
 Tell the user:
 - Package file location
 - Flow name and tool count
 - Post-import steps: set LLM provider, set TTS voice (agent name is already Jane)
 - Import path: Cognigy.AI → Build → Packages → Import
+
+## Phase 6: Register Demo in Hub (Optional)
+
+After building, import the ZIP to Cognigy and register the demo in the private hub so it appears at the branded hub URL.
+
+**Option A: automated import (recommended)**
+```bash
+# Uploads ZIP, polls until imported, then prompts for WebRTC URL
+node import-package.js ./Output.zip --site-spec ./Output-site-spec.json
+
+# Once you have the WebRTC URL, pass it directly to auto-register:
+node import-package.js ./Output.zip --site-spec ./Output-site-spec.json --webrtc-url https://endpoint-trial-us.cognigy.ai/TOKEN
+```
+Requires `COGNIGY_BASE_URL`, `COGNIGY_API_KEY`, and `COGNIGY_AGENT_ID` in `.env`.
+
+**Option B: manual import**
+1. In Cognigy.AI go to Build → Packages → Import, upload the ZIP
+2. Deploy a Voice Gateway endpoint on the imported flow
+3. Copy the endpoint URL, then:
+```bash
+node demo-hub/scripts/register-demo.js ./Output-site-spec.json --webrtc-url https://endpoint-trial-us.cognigy.ai/TOKEN
+```
+The demo appears immediately at `/<siteId>` on the hub (no redeploy needed).
+
+**Post-registration (Admin UI)**
+- Upload an avatar PNG in Admin > Flow Manager for the demo card image
+- Verify capability badges look right (icons come from `tools[].siteIcon` in the spec)
+- Set `coming_soon: false` if it was staged as hidden
+
+**Hub local dev**
+```bash
+cd /Users/Adam.Boyle/Cognigy/demo-hub
+npm run dev
+```
+Hub lives at `/Users/Adam.Boyle/Cognigy/demo-hub/`. Deploy to Vercel for a shareable URL.
+
+---
 
 ## Proven Patterns from Past Demos
 

@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<!--
+    Token Analyzer - Cognigy Demo Hub Integration
+    Version: 1.2.1 Web
+    Token Usage Analysis Tool
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Usage Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/dist/date-fns.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --secondary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --card-border: rgba(0, 0, 0, 0.08);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-bg);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: var(--secondary-gradient);
+            border-radius: 2px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .header p { font-size: 1.15rem; color: var(--text-secondary); font-weight: 400; }
+
+        .api-key-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+        }
+
+        .api-key-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .api-key-section p { color: var(--text-secondary); margin-bottom: 24px; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 11px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .api-key-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: #ffffff;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+        }
+
+        .fetch-button {
+            background: var(--secondary-gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 32px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .fetch-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(79, 172, 254, 0.5);
+        }
+
+        .fetch-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .chart-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-container { position: relative; height: 400px; }
+
+        .metric-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .metric-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(79, 172, 254, 0.3); }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 14px;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.02);
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        td { color: var(--text-secondary); }
+        tr:hover td { background: rgba(0, 0, 0, 0.01); color: var(--text-primary); }
+
+        .loading {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 60px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            display: none;
+            border: 1px solid var(--card-border);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(79, 172, 254, 0.2);
+            border-top: 4px solid var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .api-status {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .api-status.success {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .api-status.error {
+            background: rgba(236, 72, 153, 0.2);
+            color: var(--accent-pink);
+            border: 1px solid var(--accent-pink);
+        }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Token Usage Analyzer</h1>
+            <p>Analyze LLM, STT, and TTS token usage across flows and time periods. LLM tokens are captured from custom OData fields (custom1, custom2, custom3) using Overwrite Analytics node.</p>
+            <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-secondary);">
+                <strong>Version:</strong> 1.2.1 | <strong>Build Date:</strong> December 2025
+            </div>
+            <div style="margin-top: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; justify-content: center;">
+                    <input type="checkbox" id="debugModeToggle" style="cursor: pointer;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary);">Enable Debug Mode</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Debug Panel -->
+        <div id="debugPanel" style="display: none; margin-bottom: 30px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; font-weight: 600; border-bottom: 2px solid #ffc107; padding-bottom: 8px;">🔍 Debug Information</h3>
+            <div style="margin-bottom: 20px;">
+                <button onclick="copyDebugData()" style="padding: 8px 16px; background: var(--accent-cyan); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-right: 10px;">Copy All Debug Data</button>
+                <button onclick="clearDebugData()" style="padding: 8px 16px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">Clear Debug Data</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 600;">Deepgram API Response</h4>
+                    <pre id="debugDeepgramResponse" style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 6px; overflow: auto; font-size: 12px; max-height: 400px; margin: 0;">No data yet.</pre>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 600;">ElevenLabs API Response</h4>
+                    <pre id="debugElevenLabsResponse" style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 6px; overflow: auto; font-size: 12px; max-height: 400px; margin: 0;">No data yet.</pre>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 600;">Processed Data Summary</h4>
+                <pre id="debugProcessedData" style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 6px; overflow: auto; font-size: 12px; max-height: 300px; margin: 0;">No data yet.</pre>
+            </div>
+            <div style="margin-top: 20px;">
+                <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 600;">Processing Log</h4>
+                <div id="debugLog" style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 6px; font-size: 12px; max-height: 200px; overflow-y: auto; margin: 0; font-family: monospace; white-space: pre-wrap;">No logs yet.</div>
+            </div>
+        </div>
+
+        <!-- STT/TTS API Configuration -->
+        <div class="api-key-section">
+            <h3>STT/TTS API Configuration</h3>
+            <p>Configure API keys for Deepgram and ElevenLabs token usage data. Calls are proxied through the server to avoid CORS issues.</p>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="deepgramApiKey">Deepgram API Key (STT/TTS)</label>
+                    <input type="password" id="deepgramApiKey" class="api-key-input" placeholder="Enter Deepgram API key">
+                </div>
+                <div class="form-group">
+                    <label for="deepgramProjectId">Deepgram Project ID</label>
+                    <input type="text" id="deepgramProjectId" class="api-key-input" placeholder="Enter Deepgram Project ID">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="deepgramTag">Deepgram Tag (for filtering)</label>
+                    <input type="text" id="deepgramTag" class="api-key-input" placeholder="Enter tag to filter usage">
+                    <div style="font-size: 12px; color: #666; margin-top: 6px;">Leave blank to get all project usage.</div>
+                </div>
+                <div class="form-group">
+                    <label for="elevenlabsApiKey">ElevenLabs API Key (TTS)</label>
+                    <input type="password" id="elevenlabsApiKey" class="api-key-input" placeholder="Enter ElevenLabs API key">
+                    <div style="font-size: 12px; color: #666; margin-top: 6px;">Use a per-flow API key for accurate tracking.</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <div style="font-size: 12px; color: #666; padding: 10px; background-color: #f5f5f5; border-radius: 4px; border-left: 3px solid #0078d4;">
+                        <strong>Azure STT/TTS:</strong> Enable if using Azure Speech Services. Azure usage is read from Analytics custom fields (custom4 = STT hours, custom5 = TTS characters).
+                        <div style="margin-top: 10px; display: flex; gap: 24px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="enableAzureSTT">
+                                <span><strong>Enable Azure STT</strong> (custom4)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="enableAzureTTS">
+                                <span><strong>Enable Azure TTS</strong> (custom5)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OData Connection -->
+        <div class="api-key-section">
+            <h3>OData Connection</h3>
+            <p>Connect to Cognigy OData API to get session and flow information. LLM tokens are stored in custom OData fields via the Overwrite Analytics node.</p>
+            <div style="margin-top: 10px; margin-bottom: 20px; padding: 10px; background: #e7f3ff; border-radius: 5px; font-size: 13px;">
+                <strong>How to store LLM tokens:</strong> Place an Overwrite Analytics node just above the "End" node. Set custom1=inputTokens, custom2=outputTokens, custom3=totalTokens using <code>{{input.aiAgentOutput.tokenUsage.*}}</code>.
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tokenODataBaseUrl">Base URL</label>
+                    <input id="tokenODataBaseUrl" type="text" class="api-key-input" value="https://odata-trial-us.cognigy.ai/v2.4" placeholder="https://odata.your-domain/v2.4">
+                </div>
+                <div class="form-group">
+                    <label for="tokenODataApiKey">API Key</label>
+                    <input id="tokenODataApiKey" type="password" class="api-key-input" placeholder="Your API key">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tokenProjectId">Project ID</label>
+                    <input id="tokenProjectId" type="text" class="api-key-input" placeholder="Your Cognigy project ID">
+                </div>
+                <div class="form-group">
+                    <label for="tokenDateField">Date Field</label>
+                    <input id="tokenDateField" type="text" class="api-key-input" value="timestamp" placeholder="timestamp">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tokenFromDate">From Date</label>
+                    <input id="tokenFromDate" type="date" class="api-key-input">
+                </div>
+                <div class="form-group">
+                    <label for="tokenToDate">To Date</label>
+                    <input id="tokenToDate" type="date" class="api-key-input">
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; margin-bottom: 10px;">
+                <button class="fetch-button" id="fetchTokenDataBtn" onclick="fetchTokenData()">Fetch Token Data</button>
+            </div>
+            <div class="api-status" id="tokenApiStatus" style="display:none;"></div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <h3>Processing Token Data</h3>
+            <p>Please wait while we analyze token usage</p>
+        </div>
+
+        <!-- Token Metrics -->
+        <div id="tokenMetrics" style="display: none;">
+            <!-- LLM Metrics -->
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; font-size: 18px; font-weight: 600; border-bottom: 2px solid var(--accent-cyan); padding-bottom: 8px;">LLM Usage</h3>
+                <div class="dashboard-grid">
+                    <div class="metric-card"><div class="metric-label">Total LLM Input Tokens</div><div class="metric-value" id="totalLLMInputTokens">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Total LLM Output Tokens</div><div class="metric-value" id="totalLLMOutputTokens">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Total LLM Tokens</div><div class="metric-value" id="totalLLMTokens">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Average LLM Tokens/Session</div><div class="metric-value" id="avgLLMTokens">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Avg LLM Tokens/Turn</div><div class="metric-value" id="avgTokensPerTurn">-</div></div>
+                </div>
+            </div>
+
+            <!-- STT/TTS Metrics -->
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; font-size: 18px; font-weight: 600; border-bottom: 2px solid var(--accent-cyan); padding-bottom: 8px;">STT/TTS Usage</h3>
+                <div class="dashboard-grid" style="margin-bottom: 20px;">
+                    <div class="metric-card"><div class="metric-label" id="sttLabel">Total STT</div><div class="metric-value" id="totalSTTTokens">-</div></div>
+                    <div class="metric-card"><div class="metric-label" id="ttsLabel">Total TTS</div><div class="metric-value" id="totalTTSTokens">-</div></div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <h4 style="margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; font-weight: 500;">By Provider:</h4>
+                    <div class="dashboard-grid">
+                        <div class="metric-card" id="deepgramSTTCard" style="display: none;"><div class="metric-label">Deepgram STT (minutes)</div><div class="metric-value" id="deepgramSTTMinutes">-</div></div>
+                        <div class="metric-card" id="deepgramTTSCard" style="display: none;"><div class="metric-label">Deepgram TTS (characters)</div><div class="metric-value" id="deepgramTTSCharacters">-</div></div>
+                        <div class="metric-card" id="elevenlabsTTSCard" style="display: none;"><div class="metric-label">ElevenLabs TTS (characters)</div><div class="metric-value" id="elevenlabsTTSCharacters">-</div></div>
+                        <div class="metric-card" id="azureSTTCard" style="display: none;"><div class="metric-label">Azure STT (hours)</div><div class="metric-value" id="azureSTTHours">-</div></div>
+                        <div class="metric-card" id="azureTTSCard" style="display: none;"><div class="metric-label">Azure TTS (characters)</div><div class="metric-value" id="azureTTSCharacters">-</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session & Turn Metrics -->
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; font-size: 18px; font-weight: 600; border-bottom: 2px solid var(--accent-cyan); padding-bottom: 8px;">Session & Turn Metrics</h3>
+                <div class="dashboard-grid">
+                    <div class="metric-card"><div class="metric-label">Total Sessions</div><div class="metric-value" id="totalSessions">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Total Conversation Turns</div><div class="metric-value" id="totalTurns">-</div></div>
+                    <div class="metric-card"><div class="metric-label">Avg Turns/Session</div><div class="metric-value" id="avgTurnsPerSession">-</div></div>
+                </div>
+            </div>
+
+            <div id="billingNotes" style="margin-top: 12px; font-size: 13px; color: var(--text-secondary); line-height: 1.4;"></div>
+
+            <!-- Charts -->
+            <div class="chart-section">
+                <div class="chart-header"><div class="chart-title">Token Usage by Flow</div></div>
+                <div class="chart-container"><canvas id="tokenFlowChart"></canvas></div>
+            </div>
+
+            <div class="chart-section">
+                <div class="chart-header"><div class="chart-title">Token Usage Over Time</div></div>
+                <div class="chart-container"><canvas id="tokenTimeChart"></canvas></div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <h3 class="chart-title">Token Usage by Flow</h3>
+                <table id="tokenUsageTable">
+                    <thead>
+                        <tr>
+                            <th>Flow Name</th>
+                            <th>LLM Input</th>
+                            <th>LLM Output</th>
+                            <th>LLM Total</th>
+                            <th>STT Tokens</th>
+                            <th>TTS Tokens</th>
+                            <th>Total Tokens</th>
+                            <th>Sessions</th>
+                            <th>Total Turns</th>
+                            <th>Avg Turns/Session</th>
+                            <th>Avg LLM/Session</th>
+                            <th>Avg STT/Session</th>
+                            <th>Avg TTS/Session</th>
+                            <th>Tokens/Turn</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tokenUsageTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== PROXY CONFIG ==========
+        // Detect the Supabase project URL from meta or default
+        // This will be set by the parent React app via postMessage or URL param
+        let PROXY_BASE = '';
+
+        // Try to get proxy base from URL param (set by parent iframe)
+        const urlParams = new URLSearchParams(window.location.search);
+        const proxyParam = urlParams.get('proxyBase');
+        if (proxyParam) {
+            PROXY_BASE = decodeURIComponent(proxyParam);
+        }
+
+        // ========== DEBUG ==========
+        let tokenData = null;
+        let tokenCharts = {};
+        let debugData = { deepgramResponse: null, elevenlabsResponse: null, processedData: null, logs: [] };
+
+        function debugLog(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}${data ? '\n' + JSON.stringify(data, null, 2) : ''}`;
+            debugData.logs.push(logEntry);
+            updateDebugDisplay();
+        }
+
+        function updateDebugDisplay() {
+            const deepgramEl = document.getElementById('debugDeepgramResponse');
+            if (deepgramEl) deepgramEl.textContent = debugData.deepgramResponse ? JSON.stringify(debugData.deepgramResponse, null, 2) : 'No data yet.';
+            const elevenEl = document.getElementById('debugElevenLabsResponse');
+            if (elevenEl) elevenEl.textContent = debugData.elevenlabsResponse ? JSON.stringify(debugData.elevenlabsResponse, null, 2) : 'No data yet.';
+            const processedEl = document.getElementById('debugProcessedData');
+            if (processedEl && tokenData) {
+                processedEl.textContent = JSON.stringify({ totals: tokenData.totals, flows: Object.keys(tokenData.flows).map(f => ({ name: f, sessions: tokenData.flows[f].sessionCount, llmTokens: tokenData.flows[f].totalTokens })) }, null, 2);
+            }
+            const logEl = document.getElementById('debugLog');
+            if (logEl) logEl.textContent = debugData.logs.length > 0 ? debugData.logs.join('\n') : 'No logs yet.';
+        }
+
+        function copyDebugData() {
+            const allData = { timestamp: new Date().toISOString(), apiResponses: { deepgram: debugData.deepgramResponse, elevenlabs: debugData.elevenlabsResponse }, processedData: tokenData ? { totals: tokenData.totals, flows: tokenData.flows } : null, logs: debugData.logs };
+            navigator.clipboard.writeText(JSON.stringify(allData, null, 2)).then(() => alert('Debug data copied!')).catch(err => prompt('Copy this:', JSON.stringify(allData, null, 2)));
+        }
+
+        function clearDebugData() {
+            debugData = { deepgramResponse: null, elevenlabsResponse: null, processedData: null, logs: [] };
+            updateDebugDisplay();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const debugToggle = document.getElementById('debugModeToggle');
+            const debugPanel = document.getElementById('debugPanel');
+            if (debugToggle && debugPanel) {
+                debugToggle.addEventListener('change', (e) => {
+                    debugPanel.style.display = e.target.checked ? 'block' : 'none';
+                    if (e.target.checked) updateDebugDisplay();
+                });
+            }
+        });
+
+        // ========== SERVICE BASE URL (uses proxy when available) ==========
+        function getServiceBase(service) {
+            if (PROXY_BASE) {
+                return `${PROXY_BASE}/${service}`;
+            }
+            if (service === 'deepgram') return 'https://api.deepgram.com';
+            if (service === 'elevenlabs') return 'https://api.elevenlabs.io';
+            return '';
+        }
+
+        // ========== MAIN FETCH ==========
+        async function fetchTokenData() {
+            const statusEl = document.getElementById('tokenApiStatus');
+            const loadingEl = document.getElementById('loading');
+            const metricsEl = document.getElementById('tokenMetrics');
+
+            statusEl.style.display = 'block';
+            loadingEl.style.display = 'block';
+            metricsEl.style.display = 'none';
+            statusEl.textContent = 'Fetching token data...';
+            statusEl.className = 'api-status';
+
+            try {
+                const baseUrl = document.getElementById('tokenODataBaseUrl').value.trim();
+                const apiKey = document.getElementById('tokenODataApiKey').value.trim();
+                const projectId = document.getElementById('tokenProjectId').value.trim();
+                const dateField = document.getElementById('tokenDateField').value || 'timestamp';
+                const fromDate = document.getElementById('tokenFromDate').value;
+                const toDate = document.getElementById('tokenToDate').value;
+
+                if (!baseUrl || !apiKey || !projectId) throw new Error('Please fill in OData connection details');
+
+                let filter = `projectId eq '${projectId}'`;
+                if (fromDate && toDate) {
+                    const from = fromDate.substring(0, 10);
+                    const to = toDate.substring(0, 10);
+                    filter += ` and (${dateField} gt '${from}' and ${dateField} lt '${to}')`;
+                }
+
+                const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
+
+                async function fetchWithAuth(url) {
+                    let response = await fetch(`${url}&apikey=${encodeURIComponent(apiKey)}`, { headers });
+                    if (!response.ok && response.status === 401) {
+                        response = await fetch(url, { headers: { ...headers, 'Authorization': `Bearer ${apiKey}` } });
+                    }
+                    return response;
+                }
+
+                statusEl.textContent = 'Fetching Conversations and Analytics data...';
+                const convUrl = `${baseUrl}/Conversations?$filter=${encodeURIComponent(filter)}&$orderby=${encodeURIComponent('timestamp desc')}&$top=10000`;
+                const analyticsUrl = `${baseUrl}/Analytics?$filter=${encodeURIComponent(filter)}&$orderby=${encodeURIComponent('timestamp desc')}&$top=10000`;
+
+                const [convRes, analyticsRes] = await Promise.all([fetchWithAuth(convUrl), fetchWithAuth(analyticsUrl)]);
+
+                if (!convRes.ok) {
+                    let msg = `Failed to fetch Conversations: ${convRes.status} ${convRes.statusText}`;
+                    try { const t = await convRes.text(); if (t) { try { const j = JSON.parse(t); if (j.error?.message) msg += ` - ${j.error.message}`; else msg += ` - ${t.substring(0, 200)}`; } catch(e) { msg += ` - ${t.substring(0, 200)}`; } } } catch(e) {}
+                    throw new Error(msg);
+                }
+
+                const convData = await convRes.json();
+                const conversations = Array.isArray(convData) ? convData : (convData.value || []);
+
+                let analytics = [];
+                if (analyticsRes.ok) {
+                    const aData = await analyticsRes.json();
+                    analytics = Array.isArray(aData) ? aData : (aData.value || []);
+                }
+
+                window.conversationsData = conversations;
+                window.analyticsData = analytics;
+
+                try { await saveToIndexedDB('standalone_conversationsData', conversations); if (analytics.length > 0) await saveToIndexedDB('standalone_analyticsData', analytics); } catch(e) {}
+
+                tokenData = processSessionData(conversations, analytics, fromDate, toDate);
+                if (!tokenData) throw new Error('Failed to process session data.');
+
+                if (!tokenData.totals) {
+                    tokenData.totals = { inputTokens: 0, outputTokens: 0, totalTokens: 0, stt: 0, tts: 0, sttMinutes: 0, ttsCharacters: 0, deepgramSTT: { minutes: 0, tokens: 0 }, deepgramTTS: { characters: 0, tokens: 0 }, elevenlabsTTS: { characters: 0, tokens: 0 }, azureSTT: { hours: 0, tokens: 0 }, azureTTS: { characters: 0, tokens: 0 }, sessions: 0, totalTurns: 0, avgTurnsPerSession: 0 };
+                }
+
+                mergeAzureUsage(tokenData);
+
+                statusEl.textContent = 'Fetching STT/TTS token data...';
+                const deepgramApiKey = document.getElementById('deepgramApiKey').value.trim();
+                const deepgramProjectId = document.getElementById('deepgramProjectId').value.trim();
+                const deepgramTag = document.getElementById('deepgramTag').value.trim();
+
+                if (deepgramApiKey && deepgramProjectId && fromDate && toDate) {
+                    try {
+                        const deepgramUsage = await fetchDeepgramUsage(deepgramApiKey, deepgramProjectId, fromDate, toDate, deepgramTag || null);
+                        mergeDeepgramUsage(tokenData, deepgramUsage, conversations);
+                    } catch (error) { console.warn('Deepgram error:', error); }
+                }
+
+                const elevenlabsApiKey = document.getElementById('elevenlabsApiKey').value.trim();
+                if (elevenlabsApiKey && fromDate && toDate) {
+                    try {
+                        const elevenlabsUsage = await fetchElevenLabsUsage(elevenlabsApiKey, fromDate, toDate);
+                        mergeElevenLabsUsage(tokenData, elevenlabsUsage, conversations);
+                    } catch (error) { console.warn('ElevenLabs error:', error); }
+                }
+
+                const hasLLM = tokenData.totals.totalTokens > 0;
+                const hasSTTTTS = tokenData.totals.stt > 0 || tokenData.totals.tts > 0;
+
+                if (!hasLLM && !hasSTTTTS) {
+                    statusEl.textContent = 'No token data found. For LLM: use Overwrite Analytics node with custom fields. For STT/TTS: check API keys and date range.';
+                } else {
+                    statusEl.textContent = 'Token data fetched successfully!';
+                    statusEl.className = 'api-status success';
+                }
+
+                displayTokenMetrics();
+                updateDebugDisplay();
+
+            } catch (error) {
+                console.error('Error:', error);
+                statusEl.textContent = `Error: ${error.message}`;
+                statusEl.className = 'api-status error';
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // ========== DEEPGRAM ==========
+        async function fetchDeepgramUsage(apiKey, projectId, startDate, endDate, tag = null) {
+            const start = new Date(startDate).toISOString().split('T')[0];
+            const end = new Date(endDate).toISOString().split('T')[0];
+            const deepgramBase = getServiceBase('deepgram');
+            const usageData = { requests: [], breakdown: null };
+
+            let breakdownUrl = `${deepgramBase}/v1/projects/${projectId}/usage/breakdown?start=${start}&end=${end}`;
+            if (tag) breakdownUrl += `&tag=${encodeURIComponent(tag)}`;
+
+            let breakdownRes = await fetch(breakdownUrl, { headers: { 'Authorization': `Token ${apiKey}`, 'accept': 'application/json' } });
+            if (!breakdownRes.ok && breakdownRes.status === 403 && tag) {
+                breakdownUrl = `${deepgramBase}/v1/projects/${projectId}/usage/breakdown?start=${start}&end=${end}`;
+                breakdownRes = await fetch(breakdownUrl, { headers: { 'Authorization': `Token ${apiKey}`, 'accept': 'application/json' } });
+            }
+            if (!breakdownRes.ok) throw new Error(`Deepgram error: ${breakdownRes.status}`);
+            usageData.breakdown = await breakdownRes.json();
+            debugData.deepgramResponse = usageData.breakdown;
+
+            try {
+                let reqUrl = `${deepgramBase}/v1/projects/${projectId}/requests?start=${start}&end=${end}&status=succeeded`;
+                if (tag) reqUrl += `&tag=${encodeURIComponent(tag)}`;
+                const reqRes = await fetch(reqUrl, { headers: { 'Authorization': `Token ${apiKey}`, 'accept': 'application/json' } });
+                if (reqRes.ok) { const d = await reqRes.json(); usageData.requests = d.requests || []; }
+            } catch(e) {}
+
+            return usageData;
+        }
+
+        // ========== ELEVENLABS ==========
+        async function fetchElevenLabsUsage(apiKey, startDate, endDate) {
+            const startUnix = new Date(startDate).getTime();
+            const endUnix = new Date(endDate).getTime() + (24 * 60 * 60 * 1000) - 1;
+            const elevenBase = getServiceBase('elevenlabs');
+            const usageUrl = `${elevenBase}/v1/usage/character-stats?start_unix=${startUnix}&end_unix=${endUnix}&aggregation_interval=day&breakdown_type=voice&metric=tts_characters`;
+            const res = await fetch(usageUrl, { headers: { 'xi-api-key': apiKey, 'accept': 'application/json' } });
+            if (!res.ok) throw new Error(`ElevenLabs error: ${res.status}`);
+            const data = await res.json();
+            debugData.elevenlabsResponse = data;
+            return data;
+        }
+
+        // ========== MERGE FUNCTIONS (copied from original) ==========
+        function extractFromDeepgramBreakdown(breakdown) {
+            let totalHours = 0, totalTTSChars = 0;
+            if (!breakdown || !Array.isArray(breakdown.results)) return { totalHours, totalTTSChars };
+            breakdown.results.forEach(r => {
+                if (typeof r.hours === 'number') totalHours += r.hours;
+                if (typeof r.tts_characters === 'number') totalTTSChars += r.tts_characters;
+                else if (r.tts && typeof r.tts.characters === 'number') totalTTSChars += r.tts.characters;
+            });
+            return { totalHours, totalTTSChars };
+        }
+
+        function mergeDeepgramUsage(tokenData, deepgramUsage, conversations) {
+            if (!tokenData?.totals) return;
+            const { totalHours, totalTTSChars } = extractFromDeepgramBreakdown(deepgramUsage.breakdown);
+            const deepgramSTTMinutes = Math.round(totalHours * 60);
+            const deepgramTTSChars = totalTTSChars || 0;
+            const totalTokensFromHours = totalHours > 0 ? Math.round(totalHours * 100000) : 0;
+            const totalSTTTokens = Math.round(totalTokensFromHours * 0.6);
+            const totalTTSTokens = Math.round(totalTokensFromHours * 0.4) + deepgramTTSChars;
+
+            if (!tokenData.totals.deepgramSTT) tokenData.totals.deepgramSTT = { minutes: 0, tokens: 0 };
+            if (!tokenData.totals.deepgramTTS) tokenData.totals.deepgramTTS = { characters: 0, tokens: 0 };
+            tokenData.totals.deepgramSTT.minutes += deepgramSTTMinutes;
+            tokenData.totals.deepgramSTT.tokens += totalSTTTokens;
+            tokenData.totals.deepgramTTS.characters += deepgramTTSChars;
+            tokenData.totals.deepgramTTS.tokens += deepgramTTSChars;
+            tokenData.totals.sttMinutes += deepgramSTTMinutes;
+            tokenData.totals.ttsCharacters += deepgramTTSChars;
+
+            const enableAzureSTT = document.getElementById('enableAzureSTT').checked;
+            const enableAzureTTS = document.getElementById('enableAzureTTS').checked;
+            const flowsWithAzureSTT = enableAzureSTT ? Object.keys(tokenData.flows).filter(f => (tokenData.flows[f].azureSTTHours || 0) > 0) : [];
+            const flowsWithAzureTTS = enableAzureTTS ? Object.keys(tokenData.flows).filter(f => (tokenData.flows[f].azureTTSCharacters || 0) > 0) : [];
+            const excludePatterns = ['summary', 'transcript', 'process', 'write', 'case'];
+            const getFlows = (preferred) => preferred.length > 0 ? preferred : Object.keys(tokenData.flows).filter(f => { const fl = tokenData.flows[f]; const n = f.toLowerCase(); const excl = excludePatterns.some(p => n.includes(p) && fl.totalTokens === 0); return !excl && fl.sessionCount > 0; });
+
+            if (totalSTTTokens > 0) {
+                const sttFlows = getFlows(flowsWithAzureSTT);
+                if (sttFlows.length > 0) {
+                    const total = sttFlows.reduce((s, f) => s + (tokenData.flows[f].sessionCount || 0), 0);
+                    if (total > 0) sttFlows.forEach(f => { tokenData.flows[f].sttTokens += Math.round(totalSTTTokens * tokenData.flows[f].sessionCount / total); });
+                }
+            }
+            if (totalTTSTokens > 0) {
+                const ttsFlows = getFlows(flowsWithAzureTTS);
+                if (ttsFlows.length > 0) {
+                    const total = ttsFlows.reduce((s, f) => s + (tokenData.flows[f].sessionCount || 0), 0);
+                    if (total > 0) ttsFlows.forEach(f => { tokenData.flows[f].ttsTokens += Math.round(totalTTSTokens * tokenData.flows[f].sessionCount / total); });
+                }
+            }
+
+            tokenData.totals.stt = 0; tokenData.totals.tts = 0;
+            Object.keys(tokenData.flows).forEach(f => { tokenData.totals.stt += tokenData.flows[f].sttTokens; tokenData.totals.tts += tokenData.flows[f].ttsTokens; });
+        }
+
+        function mergeElevenLabsUsage(tokenData, elevenlabsUsage, conversations) {
+            if (!tokenData?.totals || !elevenlabsUsage) return;
+            let totalCharacters = 0;
+            if (elevenlabsUsage.usage && typeof elevenlabsUsage.usage === 'object') {
+                Object.keys(elevenlabsUsage.usage).forEach(v => { const vu = elevenlabsUsage.usage[v]; if (Array.isArray(vu)) vu.forEach(val => { if (typeof val === 'number') totalCharacters += val; }); });
+            } else if (elevenlabsUsage.characters !== undefined) { totalCharacters = elevenlabsUsage.characters; }
+            if (totalCharacters === 0) return;
+
+            if (!tokenData.totals.elevenlabsTTS) tokenData.totals.elevenlabsTTS = { characters: 0, tokens: 0 };
+            tokenData.totals.elevenlabsTTS.characters += totalCharacters;
+            tokenData.totals.elevenlabsTTS.tokens += totalCharacters;
+            tokenData.totals.ttsCharacters += totalCharacters;
+
+            const enableAzureTTS = document.getElementById('enableAzureTTS').checked;
+            const flowsWithAzureTTS = enableAzureTTS ? Object.keys(tokenData.flows).filter(f => tokenData.flows[f].azureTTSCharacters > 0) : [];
+            const excludePatterns = ['summary', 'transcript', 'process', 'write', 'case'];
+            let flowsToDistribute = flowsWithAzureTTS.length > 0 ? flowsWithAzureTTS : Object.keys(tokenData.flows).filter(f => { const fl = tokenData.flows[f]; const excl = excludePatterns.some(p => f.toLowerCase().includes(p) && fl.totalTokens === 0); return !excl && fl.sessionCount > 0; });
+
+            if (flowsToDistribute.length > 0) {
+                const total = flowsToDistribute.reduce((s, f) => s + (tokenData.flows[f].sessionCount || 0), 0);
+                if (total > 0) flowsToDistribute.forEach(f => { tokenData.flows[f].ttsTokens += Math.round(totalCharacters * tokenData.flows[f].sessionCount / total); });
+                tokenData.totals.tts = 0;
+                Object.keys(tokenData.flows).forEach(f => { tokenData.totals.tts += tokenData.flows[f].ttsTokens; });
+            }
+        }
+
+        function mergeAzureUsage(tokenData) {
+            if (!tokenData?.totals) return;
+            const enableAzureSTT = document.getElementById('enableAzureSTT').checked;
+            const enableAzureTTS = document.getElementById('enableAzureTTS').checked;
+            if (!enableAzureSTT && !enableAzureTTS) return;
+
+            if (!tokenData.totals.azureSTT) tokenData.totals.azureSTT = { hours: 0, tokens: 0 };
+            if (!tokenData.totals.azureTTS) tokenData.totals.azureTTS = { characters: 0, tokens: 0 };
+
+            let totalAzureSTTHours = 0, totalAzureTTSChars = 0;
+            if (tokenData.flows) {
+                Object.keys(tokenData.flows).forEach(f => {
+                    if (enableAzureSTT) totalAzureSTTHours += tokenData.flows[f].azureSTTHours || 0;
+                    if (enableAzureTTS) totalAzureTTSChars += tokenData.flows[f].azureTTSCharacters || 0;
+                });
+            }
+
+            if (enableAzureSTT) {
+                tokenData.totals.azureSTT.hours = totalAzureSTTHours;
+                tokenData.totals.azureSTT.tokens = Math.round(totalAzureSTTHours * 100000 * 0.6);
+                tokenData.totals.sttMinutes += Math.round(totalAzureSTTHours * 60);
+                const flowsWithSTT = Object.keys(tokenData.flows).filter(f => (tokenData.flows[f].azureSTTHours || 0) > 0);
+                if (flowsWithSTT.length > 0) {
+                    const total = flowsWithSTT.reduce((s, f) => s + (tokenData.flows[f].sessionCount || 0), 0);
+                    if (total > 0) { const t = tokenData.totals.azureSTT.tokens; flowsWithSTT.forEach(f => { tokenData.flows[f].sttTokens += Math.round(t * tokenData.flows[f].sessionCount / total); }); }
+                }
+            }
+            if (enableAzureTTS) {
+                tokenData.totals.azureTTS.characters = totalAzureTTSChars;
+                tokenData.totals.azureTTS.tokens = totalAzureTTSChars;
+                tokenData.totals.ttsCharacters += totalAzureTTSChars;
+                Object.keys(tokenData.flows).filter(f => (tokenData.flows[f].azureTTSCharacters || 0) > 0).forEach(f => { tokenData.flows[f].ttsTokens += (tokenData.flows[f].azureTTSCharacters || 0); });
+            }
+
+            tokenData.totals.stt = 0; tokenData.totals.tts = 0;
+            Object.keys(tokenData.flows).forEach(f => { tokenData.totals.stt += tokenData.flows[f].sttTokens; tokenData.totals.tts += tokenData.flows[f].ttsTokens; });
+        }
+
+        // ========== SESSION DATA PROCESSING ==========
+        function processSessionData(conversations, analytics = [], fromDate = null, toDate = null) {
+            if (!conversations || !Array.isArray(conversations)) conversations = [];
+            if (!analytics || !Array.isArray(analytics)) analytics = [];
+
+            const flowTokenData = {};
+            const allSessions = new Set();
+            const sessionToFlows = new Map();
+            const sessionTurns = new Map();
+
+            conversations.forEach(conv => {
+                const flowName = conv.flowName || 'Unknown';
+                const sessionId = conv.sessionId;
+                if (sessionId) {
+                    sessionTurns.set(sessionId, (sessionTurns.get(sessionId) || 0) + 1);
+                    allSessions.add(sessionId);
+                    if (!sessionToFlows.has(sessionId)) sessionToFlows.set(sessionId, new Set());
+                    sessionToFlows.get(sessionId).add(flowName);
+                }
+                if (!flowTokenData[flowName]) {
+                    flowTokenData[flowName] = { flowName, sessions: new Set(), inputTokens: 0, outputTokens: 0, totalTokens: 0, sttTokens: 0, ttsTokens: 0, azureSTTHours: 0, azureTTSCharacters: 0, totalTurns: 0 };
+                }
+                if (sessionId) flowTokenData[flowName].sessions.add(sessionId);
+            });
+
+            const enableAzureSTT = document.getElementById('enableAzureSTT').checked;
+            const enableAzureTTS = document.getElementById('enableAzureTTS').checked;
+            const sessionFlowAzureUsage = new Map();
+
+            analytics.forEach(analyticsRecord => {
+                const sessionId = analyticsRecord.sessionId || analyticsRecord.session_id || analyticsRecord.sessionID;
+                const flowName = analyticsRecord.flowName || analyticsRecord.flow_name || 'Unknown';
+                const timestamp = analyticsRecord.timestamp || analyticsRecord.date || analyticsRecord.time || new Date().toISOString();
+
+                if (fromDate && toDate) {
+                    const recordDate = new Date(timestamp);
+                    const from = new Date(fromDate); const to = new Date(toDate); to.setHours(23, 59, 59, 999);
+                    if (isNaN(recordDate.getTime()) || recordDate < from || recordDate > to) return;
+                }
+
+                let inputTokens = 0, outputTokens = 0, totalTokens = 0;
+                if (analyticsRecord.custom1) { const p = parseFloat(analyticsRecord.custom1); if (!isNaN(p)) inputTokens = p; }
+                if (analyticsRecord.custom2) { const p = parseFloat(analyticsRecord.custom2); if (!isNaN(p)) outputTokens = p; }
+                if (analyticsRecord.custom3) { const p = parseFloat(analyticsRecord.custom3); if (!isNaN(p)) totalTokens = p; }
+
+                if (!inputTokens && !outputTokens && !totalTokens) {
+                    for (const field of [analyticsRecord.custom1, analyticsRecord.custom2, analyticsRecord.custom3]) {
+                        if (field) { try { const p = JSON.parse(field); if (p.inputTokens !== undefined) inputTokens = p.inputTokens; if (p.outputTokens !== undefined) outputTokens = p.outputTokens; if (p.totalTokens !== undefined) totalTokens = p.totalTokens; if (inputTokens || outputTokens || totalTokens) break; } catch(e) {} }
+                    }
+                }
+
+                let azureSTTHours = 0, azureTTSChars = 0;
+                if (enableAzureSTT && analyticsRecord.custom4) {
+                    const parsed = parseFloat(String(analyticsRecord.custom4).trim());
+                    if (!isNaN(parsed) && parsed > 0) {
+                        if (parsed >= 10000) azureSTTHours = parsed / 10000000 / 3600;
+                        else if (parsed >= 0.1) azureSTTHours = parsed / 3600;
+                        else azureSTTHours = parsed;
+                    }
+                }
+                if (enableAzureTTS && analyticsRecord.custom5) {
+                    const str = String(analyticsRecord.custom5).trim();
+                    if (str.length > 0) {
+                        const isNumeric = /^\d+(\.\d+)?$/.test(str); const parsed = parseFloat(str);
+                        if (isNumeric && !isNaN(parsed) && parsed > 0) azureTTSChars = parsed; else azureTTSChars = str.length;
+                    }
+                }
+
+                const hasLLM = (inputTokens || outputTokens || totalTokens);
+                const hasAzure = (azureSTTHours > 0 || azureTTSChars > 0);
+
+                if (hasLLM || hasAzure) {
+                    let matchedFlowName = flowName, matchedSessionId = sessionId;
+                    if (!sessionId || flowName === 'Unknown') {
+                        const at = new Date(timestamp).getTime();
+                        for (const conv of conversations) {
+                            if (Math.abs(at - new Date(conv.timestamp).getTime()) < 60000) { matchedSessionId = conv.sessionId; matchedFlowName = conv.flowName || 'Unknown'; break; }
+                        }
+                    }
+
+                    if (matchedSessionId && matchedFlowName) {
+                        const key = `${matchedSessionId}|${matchedFlowName}`;
+                        if (hasAzure) {
+                            if (!sessionFlowAzureUsage.has(key)) sessionFlowAzureUsage.set(key, { sttHours: 0, ttsChars: 0 });
+                            const u = sessionFlowAzureUsage.get(key);
+                            u.sttHours += azureSTTHours; u.ttsChars += azureTTSChars;
+                        }
+
+                        if (hasLLM) {
+                            if (!flowTokenData[matchedFlowName]) {
+                                flowTokenData[matchedFlowName] = { flowName: matchedFlowName, sessions: new Set(), inputTokens: 0, outputTokens: 0, totalTokens: 0, sttTokens: 0, ttsTokens: 0, azureSTTHours: 0, azureTTSCharacters: 0, totalTurns: 0 };
+                            }
+                            const flow = flowTokenData[matchedFlowName];
+                            if (matchedSessionId) flow.sessions.add(matchedSessionId);
+                            flow.inputTokens += inputTokens; flow.outputTokens += outputTokens;
+                            flow.totalTokens += totalTokens || (inputTokens + outputTokens);
+                        }
+                    }
+                }
+            });
+
+            // Apply Azure usage to flows
+            sessionFlowAzureUsage.forEach((usage, key) => {
+                const [sessionId, flowName] = key.split('|');
+                if (!flowTokenData[flowName]) flowTokenData[flowName] = { flowName, sessions: new Set(), inputTokens: 0, outputTokens: 0, totalTokens: 0, sttTokens: 0, ttsTokens: 0, azureSTTHours: 0, azureTTSCharacters: 0, totalTurns: 0 };
+                flowTokenData[flowName].sessions.add(sessionId);
+                flowTokenData[flowName].azureSTTHours += usage.sttHours;
+                flowTokenData[flowName].azureTTSCharacters += usage.ttsChars;
+            });
+
+            // Count turns per flow from session data
+            sessionTurns.forEach((turns, sessionId) => {
+                sessionToFlows.get(sessionId)?.forEach(flowName => {
+                    if (flowTokenData[flowName]) flowTokenData[flowName].totalTurns += turns;
+                });
+            });
+
+            // Finalize
+            const result = { flows: {}, totals: { inputTokens: 0, outputTokens: 0, totalTokens: 0, stt: 0, tts: 0, sttMinutes: 0, ttsCharacters: 0, deepgramSTT: { minutes: 0, tokens: 0 }, deepgramTTS: { characters: 0, tokens: 0 }, elevenlabsTTS: { characters: 0, tokens: 0 }, azureSTT: { hours: 0, tokens: 0 }, azureTTS: { characters: 0, tokens: 0 }, sessions: allSessions.size, totalTurns: 0, avgTurnsPerSession: 0 } };
+
+            Object.keys(flowTokenData).forEach(flowName => {
+                const flow = flowTokenData[flowName];
+                result.flows[flowName] = { ...flow, sessionCount: flow.sessions.size };
+                delete result.flows[flowName].sessions;
+                result.totals.inputTokens += flow.inputTokens;
+                result.totals.outputTokens += flow.outputTokens;
+                result.totals.totalTokens += flow.totalTokens;
+                result.totals.totalTurns += flow.totalTurns;
+            });
+
+            result.totals.avgTurnsPerSession = result.totals.sessions > 0 ? Math.round(result.totals.totalTurns / result.totals.sessions) : 0;
+            return result;
+        }
+
+        // ========== DISPLAY ==========
+        function displayTokenMetrics() {
+            document.getElementById('tokenMetrics').style.display = 'block';
+
+            document.getElementById('totalLLMInputTokens').textContent = (tokenData.totals.inputTokens || 0).toLocaleString();
+            document.getElementById('totalLLMOutputTokens').textContent = (tokenData.totals.outputTokens || 0).toLocaleString();
+            document.getElementById('totalLLMTokens').textContent = (tokenData.totals.totalTokens || 0).toLocaleString();
+            const avgLLM = tokenData.totals.sessions > 0 ? Math.round(tokenData.totals.totalTokens / tokenData.totals.sessions) : 0;
+            document.getElementById('avgLLMTokens').textContent = avgLLM.toLocaleString();
+            const avgPerTurn = tokenData.totals.totalTurns > 0 ? Math.round(tokenData.totals.totalTokens / tokenData.totals.totalTurns) : 0;
+            document.getElementById('avgTokensPerTurn').textContent = avgPerTurn.toLocaleString();
+
+            document.getElementById('totalSessions').textContent = (tokenData.totals.sessions || 0).toLocaleString();
+            document.getElementById('totalTurns').textContent = (tokenData.totals.totalTurns || 0).toLocaleString();
+            document.getElementById('avgTurnsPerSession').textContent = (tokenData.totals.avgTurnsPerSession || 0).toLocaleString();
+
+            applyProviderLabelsAndValues();
+            updateProviderCards();
+            updateBillingNotes();
+            createTokenFlowChart();
+            createTokenTimeChart();
+            updateTokenUsageTable();
+        }
+
+        function applyProviderLabelsAndValues() {
+            const deepgramKey = document.getElementById('deepgramApiKey').value.trim();
+            const elevenKey = document.getElementById('elevenlabsApiKey').value.trim();
+            const enableAzureSTT = document.getElementById('enableAzureSTT').checked;
+            const enableAzureTTS = document.getElementById('enableAzureTTS').checked;
+            const sttMinutes = tokenData?.totals?.sttMinutes || 0;
+            const sttTokens = tokenData?.totals?.stt || 0;
+            const azureSTTHours = (enableAzureSTT && tokenData?.totals?.azureSTT?.hours) || 0;
+            const ttsChars = tokenData?.totals?.ttsCharacters || 0;
+            const ttsTokens = tokenData?.totals?.tts || 0;
+
+            let sttLabel = 'Total STT', sttValue = sttTokens.toLocaleString();
+            if (deepgramKey && enableAzureSTT) { sttLabel = 'Total STT (minutes/hours)'; const total = sttMinutes + (azureSTTHours * 60); sttValue = total > 0 ? total.toLocaleString() : sttTokens.toLocaleString(); }
+            else if (deepgramKey) { sttLabel = 'Total STT (minutes)'; sttValue = sttMinutes > 0 ? sttMinutes.toLocaleString() : sttTokens.toLocaleString(); }
+            else if (enableAzureSTT) { sttLabel = 'Total STT (hours)'; sttValue = azureSTTHours > 0 ? azureSTTHours.toFixed(4) : '0'; }
+            document.getElementById('sttLabel').textContent = sttLabel;
+            document.getElementById('totalSTTTokens').textContent = sttValue;
+
+            if (deepgramKey || elevenKey || enableAzureTTS) {
+                document.getElementById('ttsLabel').textContent = 'Total TTS (characters)';
+                document.getElementById('totalTTSTokens').textContent = ttsChars > 0 ? ttsChars.toLocaleString() : ttsTokens.toLocaleString();
+            } else {
+                document.getElementById('ttsLabel').textContent = 'Total TTS';
+                document.getElementById('totalTTSTokens').textContent = ttsTokens.toLocaleString();
+            }
+        }
+
+        function updateProviderCards() {
+            const dSTTMin = tokenData.totals.deepgramSTT?.minutes || 0;
+            const dTTSChars = tokenData.totals.deepgramTTS?.characters || 0;
+            const elTTSChars = tokenData.totals.elevenlabsTTS?.characters || 0;
+            const azSTTHours = tokenData.totals.azureSTT?.hours || 0;
+            const azTTSChars = tokenData.totals.azureTTS?.characters || 0;
+            const enableAzureSTT = document.getElementById('enableAzureSTT').checked;
+            const enableAzureTTS = document.getElementById('enableAzureTTS').checked;
+
+            const show = (id, val) => { document.getElementById(id + 'Card').style.display = val > 0 ? 'block' : 'none'; };
+            if (dSTTMin > 0) { document.getElementById('deepgramSTTCard').style.display = 'block'; document.getElementById('deepgramSTTMinutes').textContent = dSTTMin.toLocaleString(); } else document.getElementById('deepgramSTTCard').style.display = 'none';
+            if (dTTSChars > 0) { document.getElementById('deepgramTTSCard').style.display = 'block'; document.getElementById('deepgramTTSCharacters').textContent = dTTSChars.toLocaleString(); } else document.getElementById('deepgramTTSCard').style.display = 'none';
+            if (elTTSChars > 0) { document.getElementById('elevenlabsTTSCard').style.display = 'block'; document.getElementById('elevenlabsTTSCharacters').textContent = elTTSChars.toLocaleString(); } else document.getElementById('elevenlabsTTSCard').style.display = 'none';
+            if (enableAzureSTT && azSTTHours > 0) { document.getElementById('azureSTTCard').style.display = 'block'; document.getElementById('azureSTTHours').textContent = azSTTHours.toFixed(4); } else document.getElementById('azureSTTCard').style.display = 'none';
+            if (enableAzureTTS && azTTSChars > 0) { document.getElementById('azureTTSCard').style.display = 'block'; document.getElementById('azureTTSCharacters').textContent = azTTSChars.toLocaleString(); } else document.getElementById('azureTTSCard').style.display = 'none';
+        }
+
+        function updateBillingNotes() {
+            const notesEl = document.getElementById('billingNotes');
+            if (!notesEl) return;
+            const deepgramKey = document.getElementById('deepgramApiKey').value.trim();
+            const elevenKey = document.getElementById('elevenlabsApiKey').value.trim();
+            const enableAzureSTT = document.getElementById('enableAzureSTT').checked;
+            const enableAzureTTS = document.getElementById('enableAzureTTS').checked;
+            const items = [];
+            if (deepgramKey) items.push('Deepgram STT bills on minutes of audio; TTS bills on characters.');
+            if (elevenKey) items.push('ElevenLabs TTS bills on characters.');
+            if (enableAzureSTT || enableAzureTTS) { const n = []; if (enableAzureSTT) n.push('STT bills on hours'); if (enableAzureTTS) n.push('TTS bills per million characters'); items.push(`Azure: ${n.join('; ')}.`); }
+            notesEl.innerHTML = items.length > 0 ? items.map(i => `• ${i}`).join('<br>') : 'STT/TTS providers not configured.';
+        }
+
+        function createTokenFlowChart() {
+            const ctx = document.getElementById('tokenFlowChart').getContext('2d');
+            if (tokenCharts.flow) tokenCharts.flow.destroy();
+            const flows = Object.values(tokenData.flows).filter(f => f.totalTokens > 0 || f.sttTokens > 0 || f.ttsTokens > 0);
+            tokenCharts.flow = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: flows.map(f => f.flowName),
+                    datasets: [
+                        { label: 'LLM Tokens', data: flows.map(f => f.totalTokens), backgroundColor: 'rgba(79, 172, 254, 0.6)', borderColor: 'rgba(79, 172, 254, 1)', borderWidth: 1 },
+                        { label: 'STT Tokens', data: flows.map(f => f.sttTokens), backgroundColor: 'rgba(6, 182, 212, 0.6)', borderColor: 'rgba(6, 182, 212, 1)', borderWidth: 1 },
+                        { label: 'TTS Tokens', data: flows.map(f => f.ttsTokens), backgroundColor: 'rgba(139, 92, 246, 0.6)', borderColor: 'rgba(139, 92, 246, 1)', borderWidth: 1 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        function createTokenTimeChart() {
+            const ctx = document.getElementById('tokenTimeChart').getContext('2d');
+            if (tokenCharts.time) tokenCharts.time.destroy();
+            const td = processTimeSeriesData();
+            tokenCharts.time = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: td.labels,
+                    datasets: [
+                        { label: 'LLM Tokens', data: td.llmData, backgroundColor: 'rgba(79, 172, 254, 0.2)', borderColor: 'rgba(79, 172, 254, 1)', borderWidth: 2, fill: true, tension: 0.4 },
+                        { label: 'STT Tokens', data: td.sttData, backgroundColor: 'rgba(6, 182, 212, 0.2)', borderColor: 'rgba(6, 182, 212, 1)', borderWidth: 2, fill: true, tension: 0.4 },
+                        { label: 'TTS Tokens', data: td.ttsData, backgroundColor: 'rgba(139, 92, 246, 0.2)', borderColor: 'rgba(139, 92, 246, 1)', borderWidth: 2, fill: true, tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: true, position: 'top' }, tooltip: { mode: 'index', intersect: false } } }
+            });
+        }
+
+        function processTimeSeriesData() {
+            if (!tokenData || !window.analyticsData) return { labels: [], llmData: [], sttData: [], ttsData: [] };
+            const analytics = window.analyticsData || [];
+            const fromDate = document.getElementById('tokenFromDate').value;
+            const toDate = document.getElementById('tokenToDate').value;
+            if (!fromDate || !toDate) return { labels: [], llmData: [], sttData: [], ttsData: [] };
+            const startDate = new Date(fromDate), endDate = new Date(toDate);
+            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const useHours = daysDiff <= 7;
+            const timeMap = new Map();
+            analytics.forEach(record => {
+                const timestamp = record.timestamp || record.date || record.time;
+                if (!timestamp) return;
+                const date = new Date(timestamp);
+                if (isNaN(date.getTime())) return;
+                const key = useHours ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00` : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                if (!timeMap.has(key)) timeMap.set(key, { llm: 0, stt: 0, tts: 0 });
+                const d = timeMap.get(key);
+                d.llm += parseFloat(record.custom3) || (parseFloat(record.custom1) || 0) + (parseFloat(record.custom2) || 0);
+                if (record.custom4) { const p = parseFloat(record.custom4); if (!isNaN(p) && p > 0) { let h = p >= 10000 ? p / 10000000 / 3600 : p >= 0.1 ? p / 3600 : p; d.stt += Math.round(h * 100000 * 0.6); } }
+                if (record.custom5) { const s = String(record.custom5).trim(); d.tts += /^\d+(\.\d+)?$/.test(s) ? (parseFloat(s) || 0) : s.length; }
+            });
+            const sortedKeys = Array.from(timeMap.keys()).sort();
+            const labels = sortedKeys.map(key => { if (useHours) { const [dp, tp] = key.split(' '); const [, m, d] = dp.split('-'); return `${m}/${d} ${tp}`; } else { const [, m, d] = key.split('-'); return `${m}/${d}`; } });
+            return { labels, llmData: sortedKeys.map(k => timeMap.get(k).llm), sttData: sortedKeys.map(k => timeMap.get(k).stt), ttsData: sortedKeys.map(k => timeMap.get(k).tts) };
+        }
+
+        function updateTokenUsageTable() {
+            const tbody = document.getElementById('tokenUsageTableBody');
+            tbody.innerHTML = '';
+            const flows = Object.values(tokenData.flows).filter(f => f.totalTokens > 0 || f.sttTokens > 0 || f.ttsTokens > 0).sort((a, b) => b.totalTokens - a.totalTokens);
+            flows.forEach(flow => {
+                const total = flow.totalTokens + flow.sttTokens + flow.ttsTokens;
+                const avgLLM = flow.sessionCount > 0 ? (flow.totalTokens / flow.sessionCount).toFixed(0) : 0;
+                const avgSTT = flow.sessionCount > 0 ? (flow.sttTokens / flow.sessionCount).toFixed(0) : 0;
+                const avgTTS = flow.sessionCount > 0 ? (flow.ttsTokens / flow.sessionCount).toFixed(0) : 0;
+                const avgTurns = flow.sessionCount > 0 ? (flow.totalTurns / flow.sessionCount).toFixed(1) : 0;
+                const tokensPerTurn = flow.totalTurns > 0 ? (flow.totalTokens / flow.totalTurns).toFixed(1) : 0;
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${flow.flowName}</td><td>${flow.inputTokens.toLocaleString()}</td><td>${flow.outputTokens.toLocaleString()}</td><td>${flow.totalTokens.toLocaleString()}</td><td>${flow.sttTokens.toLocaleString()}</td><td>${flow.ttsTokens.toLocaleString()}</td><td>${total.toLocaleString()}</td><td>${flow.sessionCount}</td><td>${flow.totalTurns.toLocaleString()}</td><td>${avgTurns}</td><td>${avgLLM}</td><td>${avgSTT}</td><td>${avgTTS}</td><td>${tokensPerTurn}</td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ========== INDEXEDDB ==========
+        const dbName = 'TokenAnalyzerStandaloneDB';
+        let db = null;
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                if (db) { resolve(db); return; }
+                const request = indexedDB.open(dbName, 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => { db = request.result; resolve(db); };
+                request.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    if (!d.objectStoreNames.contains('dataArrays')) d.createObjectStore('dataArrays');
+                };
+            });
+        }
+        async function saveToIndexedDB(key, data) {
+            const database = await openDB();
+            return new Promise((resolve, reject) => {
+                const t = database.transaction(['dataArrays'], 'readwrite');
+                const request = t.objectStore('dataArrays').put(data, key);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+    </script>
+</body>
+</html>

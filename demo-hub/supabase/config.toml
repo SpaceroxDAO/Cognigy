@@ -1,0 +1,25 @@
+project_id = "ttvkjwlprfqtektginqh"
+
+[functions.bulk-import-users]
+verify_jwt = false
+
+[functions.send-invites]
+verify_jwt = false
+
+[functions.get-reset-link]
+verify_jwt = false
+
+[functions.set-security-question]
+verify_jwt = false
+
+[functions.verify-security-answer]
+verify_jwt = false
+
+[functions.get-security-question]
+verify_jwt = false
+
+[functions.safe-redirect]
+verify_jwt = false
+
+[functions.api-proxy]
+verify_jwt = false

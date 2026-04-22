@@ -9,8 +9,8 @@
  */
 const { cloneAndModify } = require("./cognigy-package-generator/clone-and-modify");
 
-const SOURCE_DIR = "/Users/adamcognigy/Cognigy/credit-card-analysis";
-const OUTPUT_PATH = "/Users/adamcognigy/Cognigy/Connect-America-Emergency-Response.zip";
+const SOURCE_DIR = "/Users/Adam.Boyle/Cognigy/credit-card-analysis";
+const OUTPUT_PATH = "/Users/Adam.Boyle/Cognigy/Connect-America-Emergency-Response.zip";
 
 const spec = {
   flowName: "Connect America - AI Agent",

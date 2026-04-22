@@ -1,0 +1,1 @@
+ALTER TABLE public.access_requests ADD COLUMN user_type public.user_type NOT NULL DEFAULT 'Other'::user_type;

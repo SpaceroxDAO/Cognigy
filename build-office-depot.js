@@ -4,8 +4,8 @@
  */
 const { cloneAndModify } = require("./cognigy-package-generator/clone-and-modify");
 
-const SOURCE_DIR = "/Users/adamcognigy/Cognigy/credit-card-analysis";
-const OUTPUT_PATH = "/Users/adamcognigy/Cognigy/Office-Depot-IVA-Demo.zip";
+const SOURCE_DIR = "/Users/Adam.Boyle/Cognigy/credit-card-analysis";
+const OUTPUT_PATH = "/Users/Adam.Boyle/Cognigy/Office-Depot-IVA-Demo.zip";
 
 const spec = {
   flowName: "Office Depot - AI Agent",
@@ -650,4 +650,8 @@ console.log("Tools: " + spec.tools.length);
 spec.tools.forEach((t, i) => console.log("  " + (i + 1) + ". " + t.toolId + (t.xApp ? " [xApp]" : "") + " - " + t.description.substring(0, 60) + "..."));
 console.log("");
 
-cloneAndModify(SOURCE_DIR, spec, OUTPUT_PATH);
+const { zipPath, siteSpecPath } = cloneAndModify(SOURCE_DIR, spec, OUTPUT_PATH);
+console.log("\nNext steps:");
+console.log("  1. node import-package.js " + zipPath + " --site-spec " + siteSpecPath);
+console.log("     (or import manually in Cognigy.AI, then copy the WebRTC URL)");
+console.log("  2. node demo-hub/scripts/register-demo.js " + siteSpecPath + " --webrtc-url <URL>");

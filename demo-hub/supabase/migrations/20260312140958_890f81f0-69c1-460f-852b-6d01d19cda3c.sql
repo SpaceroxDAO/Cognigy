@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX unique_pending_request_per_email ON public.access_requests (lower(email)) WHERE status = 'pending';

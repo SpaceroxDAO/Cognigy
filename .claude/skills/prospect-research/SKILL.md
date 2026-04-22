@@ -125,6 +125,11 @@ Fetch each discovered URL with a targeted extraction prompt:
 
 Also fetch the prospect's main homepage for tone and branding context.
 
+**SSL / Certificate Failures**: Corporate websites, TPAs, healthcare organizations, and insurance companies frequently return SSL errors (`self signed certificate in certificate chain`) that block WebFetch entirely. This is common — don't retry the same URL. Instead:
+1. Switch to WebSearch and extract content from the search result snippets
+2. Look for third-party sources that have re-published the content (clearinghouse directories, industry blogs, partner sites, press releases)
+3. Note in the Content Audit what was blocked and what fallback source was used
+
 ### Step 3: Content Audit
 
 After scraping, audit the results against the demo's tool set:

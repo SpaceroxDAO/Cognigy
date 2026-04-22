@@ -1,6 +1,13 @@
 # Generated ZIP packages
 *.zip
 
+# Generated site-spec output artifacts (rebuild from build scripts)
+*-site-spec.json
+
+# Word docs (binary, may contain client data — use Markdown instead)
+*.docx
+~$*
+
 # Extracted packages for analysis (not source templates)
 package-analysis/
 
